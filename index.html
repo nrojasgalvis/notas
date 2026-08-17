@@ -107,9 +107,19 @@
       <div class="chip" data-v="caja torácica (s4302)">Caja torácica <span class="code">s4302</span></div>
       <div class="chip" data-v="músculos de la respiración (s4303)">Músculos respiratorios <span class="code">s4303</span></div>
       <div class="chip" data-v="sistema respiratorio (s430)">Sistema respiratorio <span class="code">s430</span></div>
-      <div class="chip" data-v="corazón (s4100)">Corazón <span class="code">s4100</span></div>
       <div class="chip" data-v="capilares (s4103)">Capilares pulmonares <span class="code">s4103</span></div>
       <div class="chip" data-v="sistema cardiovascular (s410)">Sistema cardiovascular <span class="code">s410</span></div>
+      <div class="chip" data-v="corazón (s4100)">Corazón <span class="code">s4100</span></div>
+      <div class="chip" data-v="arterias (s4101)">Arterias <span class="code">s4101</span></div>
+      <div class="chip" data-v="venas (s4102)">Venas <span class="code">s4102</span></div>
+      <div class="chip" data-v="sistema urinario (s610)">Sistema urinario <span class="code">s610</span></div>
+      <div class="chip" data-v="riñón (s6100)">Riñón <span class="code">s6100</span></div>
+      <div class="chip" data-v="uréteres (s6101)">Uréteres <span class="code">s6101</span></div>
+      <div class="chip" data-v="vejiga urinaria (s6102)">Vejiga urinaria <span class="code">s6102</span></div>
+      <div class="chip" data-v="uretra (s6103)">Uretra <span class="code">s6103</span></div>
+      <div class="chip" data-v="hígado (s560)">Hígado <span class="code">s560</span></div>
+      <div class="chip" data-v="vesícula biliar y conductos biliares (s570)">Vesícula biliar / conductos <span class="code">s570</span></div>
+      <div class="chip" data-v="páncreas (s550)">Páncreas <span class="code">s550</span></div>
     </div>
 
     <div class="glabel">Actividades limitadas CIF (varias)</div>
@@ -207,6 +217,8 @@
       <div class="chip" data-v="optimizar el intercambio gaseoso y la oxigenación">Intercambio gaseoso</div>
       <div class="chip" data-v="fortalecer la musculatura respiratoria">Fuerza respiratoria</div>
       <div class="chip" data-v="disminuir el trabajo respiratorio">↓ Trabajo respiratorio</div>
+      <div class="chip" data-v="favorecer la higiene bronquial">Higiene bronquial</div>
+      <div class="chip" data-v="favorecer la broncodilatación mediante inhaloterapia">Inhaloterapia</div>
     </div>
     <div class="sub">Terapia física</div>
     <div class="chips" data-multi="obj_fis">
@@ -233,6 +245,7 @@
         <div class="glabel">Sistema de O₂</div>
         <select id="o2sys">
           <option value="cánula nasal">Cánula nasal</option>
+          <option value="máscara simple">Máscara simple</option>
           <option value="máscara de Venturi">Venturi</option>
           <option value="máscara de no reinhalación">No reinhalación</option>
           <option value="cánula de alto flujo">Alto flujo</option>
@@ -253,6 +266,7 @@
       <div class="chip" data-v="alerta">Alerta</div>
       <div class="chip" data-v="somnoliento">Somnoliento</div>
       <div class="chip" data-v="estuporoso">Estuporoso</div>
+      <div class="chip" data-v="con delirio">Delirio</div>
     </div>
     <div class="glabel">Comunicación</div>
     <div class="chips" data-single="com">
@@ -273,6 +287,11 @@
       <label class="fld"><span>FC (lpm)</span><input type="number" id="fc" inputmode="numeric" placeholder="59"></label>
       <label class="fld"><span>FR (rpm)</span><input type="number" id="fr" inputmode="numeric" placeholder="16"></label>
       <label class="fld"><span>SatO₂ (%)</span><input type="number" id="sat" inputmode="numeric" placeholder="97"></label>
+    </div>
+    <div class="glabel">Llenado capilar</div>
+    <div class="chips" data-single="llencap">
+      <div class="chip" data-v="normal (menor a 2 segundos)">Normal (&lt; 2 s)</div>
+      <div class="chip" data-v="prolongado (mayor a 2 segundos)">Prolongado (&gt; 2 s)</div>
     </div>
     <div class="grid">
       <div>
@@ -342,6 +361,8 @@
       <div class="chip" data-v="ejercicios respiratorios con MsSs">Ejerc. resp. MsSs</div>
       <div class="chip" data-v="puño percusión">Puño percusión</div>
       <div class="chip" data-v="aspiración de secreciones">Aspiración secreciones</div>
+      <div class="chip" data-v="técnica de aceleración del flujo espiratorio">Aceleración de flujos</div>
+      <div class="chip" data-v="inhaloterapia">Inhaloterapia</div>
     </div>
     <div class="sub">Físico</div>
     <div class="chips" data-multi="pm_fis">
@@ -373,6 +394,11 @@
     <div class="chips" data-single="svses">
       <div class="chip" data-v="sin cambios">Sin cambios</div>
       <div class="chip" data-v="con cambios">Con cambios</div>
+    </div>
+    <div class="grid3" id="tolvitals" style="display:none">
+      <label class="fld"><span>FC final (lpm)</span><input type="number" id="fc2" inputmode="numeric" placeholder="56"></label>
+      <label class="fld"><span>FR final (rpm)</span><input type="number" id="fr2" inputmode="numeric" placeholder="18"></label>
+      <label class="fld"><span>SatO₂ final (%)</span><input type="number" id="sat2" inputmode="numeric" placeholder="100"></label>
     </div>
     <div class="glabel">Signos de disnea/fatiga</div>
     <div class="chips" data-single="dfat">
@@ -459,6 +485,7 @@ document.querySelectorAll('.chips').forEach(group=>{
         if(i>=0) arr.splice(i,1); else arr.push(v);
       }
       if(single==='vent') document.getElementById('o2box').style.display = (state.single.vent==='oxigeno')?'grid':'none';
+      if(single==='svses') document.getElementById('tolvitals').style.display = (state.single.svses==='con cambios')?'grid':'none';
       render();
     });
   });
@@ -521,6 +548,7 @@ function render(){
   if(val('sat')) sv.push(`SatO₂ ${val('sat')}%`);
   if(val('fr')) sv.push(`FR ${val('fr')} rpm`);
   if(sv.length) e += ` ${sv.join(', ')}.`;
+  if(s.llencap) e += ` Llenado capilar ${s.llencap}.`;
   if(s.exp){ e += ` Expansión torácica ${s.exp}`; if(val('expcm')) e += ` ${val('expcm')} cm`; e += '.'; }
   const tx = [];
   if(s.torax) tx.push(`tórax ${s.torax}`);
@@ -548,10 +576,14 @@ function render(){
     let t = `Paciente ${s.tol} la intervención.`;
     if(s.svses){
       t += ` ${cap(s.svses)} en los signos vitales durante la sesión`;
+      const useFinal = (s.svses==='con cambios');
+      const fcv  = useFinal ? (val('fc2')  || val('fc'))  : val('fc');
+      const frv  = useFinal ? (val('fr2')  || val('fr'))  : val('fr');
+      const satv = useFinal ? (val('sat2') || val('sat')) : val('sat');
       const svf = [];
-      if(val('fc')) svf.push(`FC ${val('fc')}`);
-      if(val('fr')) svf.push(`FR ${val('fr')}`);
-      if(val('sat')) svf.push(`SatO₂ ${val('sat')}%`);
+      if(fcv)  svf.push(`FC ${fcv}`);
+      if(frv)  svf.push(`FR ${frv}`);
+      if(satv) svf.push(`SatO₂ ${satv}%`);
       if(svf.length) t += `: ${svf.join(', ')}`;
       t += '.';
     }
@@ -596,6 +628,7 @@ document.getElementById('clearBtn').addEventListener('click', ()=>{
   Object.keys(state.single).forEach(k=>state.single[k]=null);
   Object.keys(state.multi).forEach(k=>state.multi[k]=[]);
   document.getElementById('o2box').style.display='none';
+  document.getElementById('tolvitals').style.display='none';
   render();
 });
 
@@ -697,6 +730,7 @@ function applyPreset(p){
   Object.entries(p.single).forEach(([k,v])=>{ if(v){ state.single[k]=v; markChip('single',k,v);} });
   Object.entries(p.multi).forEach(([k,arr])=>{ state.multi[k]=[...arr]; arr.forEach(v=>markChip('multi',k,v)); });
   document.getElementById('o2box').style.display = (state.single.vent==='oxigeno')?'grid':'none';
+  document.getElementById('tolvitals').style.display = (state.single.svses==='con cambios')?'grid':'none';
   render();
   window.scrollTo({top:0, behavior:'smooth'});
 }
