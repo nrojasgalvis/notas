@@ -40,6 +40,13 @@
   .presets{display:flex; flex-wrap:wrap; gap:8px; margin:2px 0 0}
   .preset{border:1px dashed var(--steel); background:#eef3fb; color:var(--navy); padding:8px 13px; border-radius:9px; font-size:13px; cursor:pointer; font-weight:600;}
   .preset:hover{background:#e2ebfa}
+  .preset.active{background:#1F3864;color:#fff;border-style:solid;border-color:#1F3864}
+  .card.collapsible > h2{cursor:pointer}
+  .card.collapsible > h2 .caret{margin-left:auto;font-size:12px;color:#8aa0c4;transition:transform .15s}
+  .card.collapsible:not(.collapsed) > h2 .caret{transform:rotate(90deg)}
+  .card.collapsible.collapsed > .cardbody{display:none}
+  .stepbar{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .stepbar span{font-size:11.5px;background:rgba(255,255,255,.15);color:#fff;padding:3px 9px;border-radius:999px;font-weight:600}
   .output-bar{position:fixed; left:0; right:0; bottom:0; z-index:30; background:#fff; border-top:1px solid var(--line); box-shadow:0 -4px 16px rgba(20,40,80,.10);}
   .output-inner{max-width:820px; margin:0 auto; padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
   .out-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 8px}
@@ -49,9 +56,21 @@
   .copy{background:var(--navy); color:#fff}
   .copy:hover{background:#294a7d}
   .copy.done{background:var(--ok)}
+  .next{background:var(--ok); color:#fff}
+  .next:hover{filter:brightness(1.05)}
+  .next.done{background:#155c39}
+  button.act{padding:10px 12px; font-size:13.5px}
   .clear{background:#eef1f6; color:var(--muted)}
   .clear:hover{background:#e2e7ef}
-  #preview{background:#f8fafd; border:1px solid var(--line2); border-radius:9px; padding:11px 12px; font-size:12.5px; line-height:1.55; color:var(--ink); max-height:26vh; overflow:auto; white-space:pre-wrap;}
+  #preview{background:#f8fafd; border:1px solid var(--line2); border-radius:9px; padding:8px; font-size:12.5px; line-height:1.55; color:var(--ink); max-height:26vh; overflow:auto;}
+  #preview .seg{background:#fff; border:1px solid var(--line2); border-radius:8px; padding:8px 9px; margin-bottom:7px}
+  #preview .seg:last-child{margin-bottom:0}
+  #preview .seg-head{display:flex; align-items:center; gap:8px; margin-bottom:4px}
+  #preview .seg-head .h{font-weight:700; color:var(--navy); font-size:11.5px; flex:1}
+  #preview .seg-body{white-space:pre-wrap}
+  .seg-copy{border:1px solid var(--navy); background:#fff; color:var(--navy); font-size:11px; font-weight:700; padding:3px 10px; border-radius:7px; cursor:pointer; flex:none; font-family:inherit}
+  .seg-copy:hover{background:var(--navy); color:#fff}
+  .seg-copy.done{background:var(--ok); border-color:var(--ok); color:#fff}
   #preview .h{font-weight:700; color:var(--navy)}
   @media (max-width:520px){ .grid3{grid-template-columns:1fr 1fr} #preview{max-height:22vh} }
 </style>
@@ -60,18 +79,26 @@
 <header>
   <h1>Generador de notas · Fisioterapia</h1>
   <p>Marca lo que aplica, escribe los números y copia la nota lista.</p>
+  <div class="stepbar"><span>1 · Perfil</span><span>2 · Respiratorio</span><span>3 · Datos + vitales</span><span>▸ Copiar</span></div>
 </header>
 
 <div class="wrap">
 
   <div class="card">
-    <h2><span class="n">★</span>Plantillas rápidas</h2>
+    <h2><span class="n">1</span>Perfil por sistema</h2>
     <div class="presets" id="presets"></div>
-    <div class="radio-note" style="margin-top:8px">Cargan las opciones típicas; luego ajusta lo que necesites.</div>
+    <div style="margin-top:10px"><button type="button" id="varyBtn" class="preset" style="border-style:solid;background:#1F3864;color:#fff;border-color:#1F3864">🔀 Variar redacción</button></div>
+    <div class="radio-note" style="margin-top:8px">Un toque precarga estructuras, categorías, limitaciones y el resto de la nota. La redacción del plan, plan de manejo, educación y observaciones rota sola en cada evolución para que no se repitan; usa «Variar» para cambiarla manualmente.</div>
   </div>
 
   <div class="card">
-    <h2><span class="n">1</span>Identificación</h2>
+    <h2><span class="n">2</span>Soporte respiratorio</h2>
+    <div class="presets" id="resptypes"></div>
+    <div class="radio-note" style="margin-top:8px">Opcional. Elige la condición respiratoria del paciente y se ajustan solos los objetivos y el tratamiento respiratorio (oxígeno, inhaloterapia, succión…).</div>
+  </div>
+
+  <div class="card" id="datosCard">
+    <h2><span class="n">3</span>Paciente, signos vitales y estado</h2>
     <div class="glabel">Sexo</div>
     <div class="chips" data-single="sexo">
       <div class="chip" data-v="masculino">Masculino</div>
@@ -96,6 +123,124 @@
       </select>
     </label>
     <label class="fld" id="dxOtroWrap" style="display:none"><span>Otro diagnóstico (código + texto)</span><input type="text" id="dxOtro" placeholder="T845 – Infección de prótesis articular interna"></label>
+    <div class="glabel" style="margin-top:6px">Signos vitales</div>
+    <div class="grid3">
+      <label class="fld"><span>FC (lpm)</span><input type="number" id="fc" inputmode="numeric" placeholder="59"></label>
+      <label class="fld"><span>FR (rpm)</span><input type="number" id="fr" inputmode="numeric" placeholder="16"></label>
+      <label class="fld"><span>SatO₂ (%)</span><input type="number" id="sat" inputmode="numeric" placeholder="97"></label>
+    </div>
+    <div class="sub" style="margin-top:14px">Estado del paciente</div>
+    <div class="glabel">Ventilación</div>
+    <div class="chips" data-single="vent">
+      <div class="chip" data-v="aire">Aire ambiente</div>
+      <div class="chip" data-v="oxigeno">Con oxígeno</div>
+    </div>
+    <div class="grid" id="o2box" style="display:none">
+      <div>
+        <div class="glabel">Sistema de O₂</div>
+        <select id="o2sys">
+          <option value="cánula nasal">Cánula nasal</option>
+          <option value="máscara simple">Máscara simple</option>
+          <option value="máscara de Venturi">Venturi</option>
+          <option value="máscara de no reinhalación">No reinhalación</option>
+          <option value="cánula de alto flujo">Alto flujo</option>
+        </select>
+      </div>
+      <label class="fld"><span>Flujo (L/min)</span><input type="number" id="o2flujo" inputmode="numeric" placeholder="2"></label>
+    </div>
+    <div class="glabel" style="margin-top:6px">Posición al valorar</div>
+    <div class="chips" data-single="pos">
+      <div class="chip" data-v="decúbito">Decúbito</div>
+      <div class="chip" data-v="sedente">Sedente</div>
+      <div class="chip" data-v="bípedo al lado de la cama">Bípedo</div>
+    </div>
+
+    <div class="sub">Neurológico</div>
+    <div class="glabel">Conciencia</div>
+    <div class="chips" data-single="conc">
+      <div class="chip" data-v="alerta">Alerta</div>
+      <div class="chip" data-v="somnoliento">Somnoliento</div>
+      <div class="chip" data-v="estuporoso">Estuporoso</div>
+      <div class="chip" data-v="con delirio">Delirio</div>
+    </div>
+    <div class="glabel">Comunicación</div>
+    <div class="chips" data-single="com">
+      <div class="chip" data-v="conservada">Conservada</div>
+      <div class="chip" data-v="con afasia de Broca">Afasia Broca</div>
+      <div class="chip" data-v="con afasia de Wernicke">Afasia Wernicke</div>
+      <div class="chip" data-v="con disartria">Disartria</div>
+    </div>
+    <div class="glabel">Orientación</div>
+    <div class="chips" data-single="ori">
+      <div class="chip" data-v="orientado en las 3 esferas">3 esferas</div>
+      <div class="chip" data-v="parcialmente orientado">Parcial</div>
+      <div class="chip" data-v="desorientado">Desorientado</div>
+    </div>
+
+    <div class="sub">Cardiorrespiratorio</div>
+    <div class="glabel">Llenado capilar</div>
+    <div class="chips" data-single="llencap">
+      <div class="chip" data-v="normal (menor a 2 segundos)">Normal (&lt; 2 s)</div>
+      <div class="chip" data-v="prolongado (mayor a 2 segundos)">Prolongado (&gt; 2 s)</div>
+    </div>
+    <div class="grid">
+      <div>
+        <div class="glabel">Expansión torácica</div>
+        <div class="chips" data-single="exp">
+          <div class="chip" data-v="conservada">Conservada</div>
+          <div class="chip" data-v="disminuida">Disminuida</div>
+        </div>
+      </div>
+      <label class="fld"><span>Medición (cm)</span><input type="number" id="expcm" inputmode="decimal" placeholder="4"></label>
+    </div>
+    <div class="glabel">Tórax</div>
+    <div class="chips" data-single="torax">
+      <div class="chip" data-v="simétrico">Simétrico</div>
+      <div class="chip" data-v="asimétrico">Asimétrico</div>
+    </div>
+    <div class="glabel">Ritmo</div>
+    <div class="chips" data-single="ritmo">
+      <div class="chip" data-v="regular">Regular</div>
+      <div class="chip" data-v="irregular">Irregular</div>
+    </div>
+    <div class="glabel">Patrón</div>
+    <div class="chips" data-single="patron">
+      <div class="chip" data-v="costodiafragmático">Costodiafragmático</div>
+      <div class="chip" data-v="costal superior">Costal superior</div>
+      <div class="chip" data-v="abdominal">Abdominal</div>
+    </div>
+    <div class="glabel">Musculatura accesoria / tirajes</div>
+    <div class="chips" data-single="acc">
+      <div class="chip" data-v="sin uso de musculatura accesoria y sin tirajes">Sin uso / sin tirajes</div>
+      <div class="chip" data-v="con uso de musculatura accesoria y tirajes">Con uso / con tirajes</div>
+    </div>
+    <div class="glabel">Murmullo vesicular</div>
+    <div class="chips" data-single="mv">
+      <div class="chip" data-v="conservado">Conservado</div>
+      <div class="chip" data-v="disminuido">Disminuido</div>
+      <div class="chip" data-v="abolido">Abolido</div>
+    </div>
+    <div class="glabel">Campos auscultados (varios)</div>
+    <div class="chips" data-multi="campo">
+      <div class="chip" data-v="ambos campos pulmonares">Ambos campos</div>
+      <div class="chip" data-v="ápice derecho">Ápice derecho</div>
+      <div class="chip" data-v="ápice izquierdo">Ápice izquierdo</div>
+      <div class="chip" data-v="campo medio derecho">Medio derecho</div>
+      <div class="chip" data-v="campo medio izquierdo">Medio izquierdo</div>
+      <div class="chip" data-v="base derecha">Base derecha</div>
+      <div class="chip" data-v="base izquierda">Base izquierda</div>
+    </div>
+    <div class="glabel">Ruidos agregados</div>
+    <div class="chips" data-single="ruidos">
+      <div class="chip" data-v="sin ruidos agregados">Ninguno</div>
+      <div class="chip" data-v="con crépitos">Crépitos</div>
+      <div class="chip" data-v="con roncus">Roncus</div>
+      <div class="chip" data-v="con sibilancias">Sibilancias</div>
+      <div class="chip" data-v="con estertores">Estertores</div>
+    </div>
+  </div>
+  <div class="card">
+    <h2><span class="n">⚙</span>Detalles CIF <span style="font-weight:400;font-size:11px;color:#5a6b85">(precargado por el perfil)</span></h2>
 
     <div class="glabel">Estructuras CIF afectadas (varias)</div>
     <div class="chips" data-multi="estructura">
@@ -120,6 +265,19 @@
       <div class="chip" data-v="hígado (s560)">Hígado <span class="code">s560</span></div>
       <div class="chip" data-v="vesícula biliar y conductos biliares (s570)">Vesícula biliar / conductos <span class="code">s570</span></div>
       <div class="chip" data-v="páncreas (s550)">Páncreas <span class="code">s550</span></div>
+      <div class="chip" data-v="cerebro (s110)">Cerebro <span class="code">s110</span></div>
+      <div class="chip" data-v="tronco encefálico (s1104)">Tronco encefálico <span class="code">s1104</span></div>
+      <div class="chip" data-v="cerebelo (s1105)">Cerebelo <span class="code">s1105</span></div>
+      <div class="chip" data-v="médula espinal y estructuras relacionadas (s120)">Médula espinal <span class="code">s120</span></div>
+      <div class="chip" data-v="nervios raquídeos (s1201)">Nervios raquídeos <span class="code">s1201</span></div>
+      <div class="chip" data-v="meninges (s130)">Meninges <span class="code">s130</span></div>
+      <div class="chip" data-v="huesos (s7700)">Huesos <span class="code">s7700</span></div>
+      <div class="chip" data-v="articulaciones (s7701)">Articulaciones <span class="code">s7701</span></div>
+      <div class="chip" data-v="músculos (s7702)">Músculos <span class="code">s7702</span></div>
+      <div class="chip" data-v="ligamentos y fascias (s7703)">Ligamentos / fascias <span class="code">s7703</span></div>
+      <div class="chip" data-v="extremidad superior (s730)">Extremidad superior <span class="code">s730</span></div>
+      <div class="chip" data-v="extremidad inferior (s750)">Extremidad inferior <span class="code">s750</span></div>
+      <div class="chip" data-v="tronco (s760)">Tronco <span class="code">s760</span></div>
     </div>
 
     <div class="glabel">Actividades limitadas CIF (varias)</div>
@@ -206,7 +364,7 @@
   </div>
 
   <div class="card">
-    <h2><span class="n">2</span>Objetivos</h2>
+    <h2><span class="n">⚙</span>Objetivos</h2>
     <div class="sub">Terapia respiratoria</div>
     <div class="chips" data-multi="obj_resp">
       <div class="chip" data-v="optimizar el patrón ventilatorio">Patrón ventilatorio</div>
@@ -234,124 +392,7 @@
   </div>
 
   <div class="card">
-    <h2><span class="n">3</span>Estado del paciente</h2>
-    <div class="glabel">Ventilación</div>
-    <div class="chips" data-single="vent">
-      <div class="chip" data-v="aire">Aire ambiente</div>
-      <div class="chip" data-v="oxigeno">Con oxígeno</div>
-    </div>
-    <div class="grid" id="o2box" style="display:none">
-      <div>
-        <div class="glabel">Sistema de O₂</div>
-        <select id="o2sys">
-          <option value="cánula nasal">Cánula nasal</option>
-          <option value="máscara simple">Máscara simple</option>
-          <option value="máscara de Venturi">Venturi</option>
-          <option value="máscara de no reinhalación">No reinhalación</option>
-          <option value="cánula de alto flujo">Alto flujo</option>
-        </select>
-      </div>
-      <label class="fld"><span>Flujo (L/min)</span><input type="number" id="o2flujo" inputmode="numeric" placeholder="2"></label>
-    </div>
-    <div class="glabel" style="margin-top:6px">Posición al valorar</div>
-    <div class="chips" data-single="pos">
-      <div class="chip" data-v="decúbito">Decúbito</div>
-      <div class="chip" data-v="sedente">Sedente</div>
-      <div class="chip" data-v="bípedo al lado de la cama">Bípedo</div>
-    </div>
-
-    <div class="sub">Neurológico</div>
-    <div class="glabel">Conciencia</div>
-    <div class="chips" data-single="conc">
-      <div class="chip" data-v="alerta">Alerta</div>
-      <div class="chip" data-v="somnoliento">Somnoliento</div>
-      <div class="chip" data-v="estuporoso">Estuporoso</div>
-      <div class="chip" data-v="con delirio">Delirio</div>
-    </div>
-    <div class="glabel">Comunicación</div>
-    <div class="chips" data-single="com">
-      <div class="chip" data-v="conservada">Conservada</div>
-      <div class="chip" data-v="con afasia de Broca">Afasia Broca</div>
-      <div class="chip" data-v="con afasia de Wernicke">Afasia Wernicke</div>
-      <div class="chip" data-v="con disartria">Disartria</div>
-    </div>
-    <div class="glabel">Orientación</div>
-    <div class="chips" data-single="ori">
-      <div class="chip" data-v="orientado en las 3 esferas">3 esferas</div>
-      <div class="chip" data-v="parcialmente orientado">Parcial</div>
-      <div class="chip" data-v="desorientado">Desorientado</div>
-    </div>
-
-    <div class="sub">Cardiorrespiratorio</div>
-    <div class="grid3">
-      <label class="fld"><span>FC (lpm)</span><input type="number" id="fc" inputmode="numeric" placeholder="59"></label>
-      <label class="fld"><span>FR (rpm)</span><input type="number" id="fr" inputmode="numeric" placeholder="16"></label>
-      <label class="fld"><span>SatO₂ (%)</span><input type="number" id="sat" inputmode="numeric" placeholder="97"></label>
-    </div>
-    <div class="glabel">Llenado capilar</div>
-    <div class="chips" data-single="llencap">
-      <div class="chip" data-v="normal (menor a 2 segundos)">Normal (&lt; 2 s)</div>
-      <div class="chip" data-v="prolongado (mayor a 2 segundos)">Prolongado (&gt; 2 s)</div>
-    </div>
-    <div class="grid">
-      <div>
-        <div class="glabel">Expansión torácica</div>
-        <div class="chips" data-single="exp">
-          <div class="chip" data-v="conservada">Conservada</div>
-          <div class="chip" data-v="disminuida">Disminuida</div>
-        </div>
-      </div>
-      <label class="fld"><span>Medición (cm)</span><input type="number" id="expcm" inputmode="decimal" placeholder="4"></label>
-    </div>
-    <div class="glabel">Tórax</div>
-    <div class="chips" data-single="torax">
-      <div class="chip" data-v="simétrico">Simétrico</div>
-      <div class="chip" data-v="asimétrico">Asimétrico</div>
-    </div>
-    <div class="glabel">Ritmo</div>
-    <div class="chips" data-single="ritmo">
-      <div class="chip" data-v="regular">Regular</div>
-      <div class="chip" data-v="irregular">Irregular</div>
-    </div>
-    <div class="glabel">Patrón</div>
-    <div class="chips" data-single="patron">
-      <div class="chip" data-v="costodiafragmático">Costodiafragmático</div>
-      <div class="chip" data-v="costal superior">Costal superior</div>
-      <div class="chip" data-v="abdominal">Abdominal</div>
-    </div>
-    <div class="glabel">Musculatura accesoria / tirajes</div>
-    <div class="chips" data-single="acc">
-      <div class="chip" data-v="sin uso de musculatura accesoria y sin tirajes">Sin uso / sin tirajes</div>
-      <div class="chip" data-v="con uso de musculatura accesoria y tirajes">Con uso / con tirajes</div>
-    </div>
-    <div class="glabel">Murmullo vesicular</div>
-    <div class="chips" data-single="mv">
-      <div class="chip" data-v="conservado">Conservado</div>
-      <div class="chip" data-v="disminuido">Disminuido</div>
-      <div class="chip" data-v="abolido">Abolido</div>
-    </div>
-    <div class="glabel">Campos auscultados (varios)</div>
-    <div class="chips" data-multi="campo">
-      <div class="chip" data-v="ambos campos pulmonares">Ambos campos</div>
-      <div class="chip" data-v="ápice derecho">Ápice derecho</div>
-      <div class="chip" data-v="ápice izquierdo">Ápice izquierdo</div>
-      <div class="chip" data-v="campo medio derecho">Medio derecho</div>
-      <div class="chip" data-v="campo medio izquierdo">Medio izquierdo</div>
-      <div class="chip" data-v="base derecha">Base derecha</div>
-      <div class="chip" data-v="base izquierda">Base izquierda</div>
-    </div>
-    <div class="glabel">Ruidos agregados</div>
-    <div class="chips" data-single="ruidos">
-      <div class="chip" data-v="sin ruidos agregados">Ninguno</div>
-      <div class="chip" data-v="con crépitos">Crépitos</div>
-      <div class="chip" data-v="con roncus">Roncus</div>
-      <div class="chip" data-v="con sibilancias">Sibilancias</div>
-      <div class="chip" data-v="con estertores">Estertores</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">4</span>Plan de manejo</h2>
+    <h2><span class="n">⚙</span>Plan de manejo</h2>
     <div class="sub">Respiratorio</div>
     <div class="chips" data-multi="pm_resp">
       <div class="chip" data-v="higiene bronquial">Higiene bronquial</div>
@@ -383,7 +424,7 @@
   </div>
 
   <div class="card">
-    <h2><span class="n">5</span>Tolerancia</h2>
+    <h2><span class="n">⚙</span>Tolerancia</h2>
     <div class="glabel">Tolerancia al tratamiento</div>
     <div class="chips" data-single="tol">
       <div class="chip" data-v="tolera adecuadamente">Adecuada</div>
@@ -421,7 +462,7 @@
   </div>
 
   <div class="card">
-    <h2><span class="n">6</span>Plan y educación</h2>
+    <h2><span class="n">⚙</span>Plan y educación</h2>
     <div class="glabel">Plan</div>
     <div class="chips" data-multi="plan">
       <div class="chip" data-v="terapia respiratoria">Terapia respiratoria</div>
@@ -456,7 +497,8 @@
       <strong>Nota generada</strong>
       <div class="btns">
         <button class="act clear" id="clearBtn">Limpiar</button>
-        <button class="act copy" id="copyBtn">Copiar nota</button>
+        <button class="act copy" id="copyBtn">Copiar</button>
+        <button class="act next" id="nextBtn">Copiar y siguiente ▸</button>
       </div>
     </div>
     <div id="preview"></div>
@@ -521,23 +563,17 @@ function render(){
   if(m.estructura.length) c += `, quien cursa con alteración en las estructuras: ${listJoin(m.estructura)}`;
   if(m.sistemas.length) c += `, generando procesos fisiopatológicos de los sistemas ${listJoin(m.sistemas)}`;
   if(m.categorias.length) c += `, lo cual afecta las categorías de ${listJoin(m.categorias)}`;
-  if(m.actividad.length) c += `. Presentando dificultad para la realización de actividades como: ${listJoin(m.actividad)}`;
+  if(m.actividad.length) c += `, presentando dificultad para la realización de actividades como: ${listJoin(m.actividad)}`;
   c += ', según la CIF.';
-  P.push(['CONCLUSIÓN FISIOTERAPÉUTICA', c]);
 
-  let obj = '';
-  if(m.obj_resp.length) obj += `Terapia respiratoria: ${listJoin(m.obj_resp)}. `;
-  if(m.obj_fis.length) obj += `Terapia física: ${listJoin(m.obj_fis)}.`;
-  if(obj) P.push(['OBJETIVO DE TRATAMIENTO', obj.trim()]);
-
-  let e = `Se valora paciente ${sexo} de ${edad} años de edad, con diagnóstico de ${dx}, ubicado en cama ${cama}`;
+  let e = `Se valora paciente ${sexo} de ${edad} años de edad, con diagnóstico de ${dx}, ubicado en la cama ${cama}`;
   if(s.vent==='aire') e += ', ventilando a aire ambiente';
   else if(s.vent==='oxigeno'){
     const flujo = val('o2flujo')?` a ${val('o2flujo')} L/min`:'';
     e += `, con soporte de oxígeno por ${document.getElementById('o2sys').value}${flujo}`;
   }
+  if(s.pos) e += `, en ${s.pos}`;
   e += '. Se procede con elementos de protección personal.';
-  if(s.pos) e += ` Se encuentra paciente en ${s.pos}.`;
   const neuro = [];
   if(s.conc) neuro.push(`estado de conciencia ${s.conc}`);
   if(s.com) neuro.push(`comunicación ${s.com}`);
@@ -562,8 +598,16 @@ function render(){
     if(s.ruidos) e += `, ${s.ruidos}`;
     e += '.';
   }
+
+  let obj = '';
+  if(m.obj_resp.length) obj += `Terapia respiratoria: ${listJoin(m.obj_resp)}. `;
+  if(m.obj_fis.length) obj += `Terapia física: ${listJoin(m.obj_fis)}.`;
+
+  P.push(['CONCLUSIÓN FISIOTERAPÉUTICA', c]);
+  if(obj) P.push(['OBJETIVO DE TRATAMIENTO', obj.trim()]);
   P.push(['DESCRIPCIÓN DEL ESTADO DEL PACIENTE', e]);
   if(m.riesgos.length) P.push(['RIESGOS', cap(listJoin(m.riesgos)) + '.']);
+
 
   const pm = [...m.pm_resp, ...m.pm_fis];
   if(pm.length){
@@ -589,6 +633,7 @@ function render(){
     }
     if(s.dfat) t += ` ${cap(s.dfat)} signos de disnea o fatiga.`;
     if(m.deja.length) t += ` Se deja paciente ${listJoin(m.deja)}.`;
+    if(currentObs) t += ' ' + currentObs;
     if(val('novedades')) t += ' ' + val('novedades').trim() + (val('novedades').trim().endsWith('.')?'':'.');
     P.push(['OBSERVACIONES, PROBLEMAS Y TOLERANCIA AL TRATAMIENTO', t]);
   }
@@ -602,21 +647,79 @@ function render(){
   }
 
   window._plain = P.map(([h,b])=>`${h}\n${b}`).join('\n\n');
-  document.getElementById('preview').innerHTML =
-    P.map(([h,b])=>`<span class="h">${h}</span>\n${escapeHtml(b)}`).join('\n\n') ||
-    '<span style="color:#8a97ad">Marca opciones arriba y la nota aparecerá aquí…</span>';
+  window._sections = P;
+  const prev = document.getElementById('preview');
+  if(P.length===0){
+    prev.innerHTML = '<span style="color:#8a97ad">Marca opciones arriba y la nota aparecerá aquí…</span>';
+  } else {
+    prev.innerHTML = P.map(([h,b],i)=>
+      `<div class="seg">`+
+        `<div class="seg-head"><span class="h">${h}</span>`+
+        `<button class="seg-copy" data-i="${i}" title="Copiar esta sección">Copiar</button></div>`+
+        `<div class="seg-body">${escapeHtml(b)}</div>`+
+      `</div>`
+    ).join('');
+  }
 }
 function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
 function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-document.getElementById('copyBtn').addEventListener('click', async ()=>{
-  const txt = window._plain || '';
-  if(!txt) return;
+async function copyText(txt){
+  if(!txt) return false;
   try{ await navigator.clipboard.writeText(txt); }
   catch(e){ const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
-  const b=document.getElementById('copyBtn'); b.textContent='¡Copiado!'; b.classList.add('done');
-  setTimeout(()=>{ b.textContent='Copiar nota'; b.classList.remove('done'); }, 1400);
+  return true;
+}
+async function copyNote(){ return copyText(window._plain || ''); }
+
+// Botón de copia por segmento (delegación de eventos)
+document.getElementById('preview').addEventListener('click', async (ev)=>{
+  const btn = ev.target.closest('.seg-copy'); if(!btn) return;
+  const i = +btn.dataset.i;
+  const sec = (window._sections||[])[i]; if(!sec) return;
+  if(!(await copyText(sec[1]))) return;
+  btn.textContent='¡Copiado!'; btn.classList.add('done');
+  setTimeout(()=>{ btn.textContent='Copiar'; btn.classList.remove('done'); }, 1200);
 });
+document.getElementById('copyBtn').addEventListener('click', async ()=>{
+  if(!(await copyNote())) return;
+  const b=document.getElementById('copyBtn'); b.textContent='¡Copiado!'; b.classList.add('done');
+  setTimeout(()=>{ b.textContent='Copiar'; b.classList.remove('done'); }, 1400);
+});
+
+// Reinicia SOLO los datos del paciente; conserva el perfil y el tipo respiratorio
+function resetPatient(){
+  ['edad','cama','fc','fr','sat','fc2','fr2','sat2','expcm','novedades','dxOtro'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  // limpiar sexo (single)
+  const sg=document.querySelector('[data-single="sexo"]'); if(sg){ sg.querySelectorAll('.chip').forEach(c=>c.classList.remove('on')); }
+  state.single.sexo=null;
+  document.getElementById('dx').value='';
+  document.getElementById('dxOtroWrap').style.display='none';
+}
+document.getElementById('nextBtn').addEventListener('click', async ()=>{
+  if(!(await copyNote())) return;
+  resetPatient();
+  // rota la redacción para que la siguiente nota del mismo perfil sea distinta
+  if(currentProfile){ const idx=getIdx(currentProfile); applyVariant(currentProfile, idx); setIdx(currentProfile, idx+1); }
+  render();
+  const b=document.getElementById('nextBtn'); b.textContent='¡Copiado! ▸'; b.classList.add('done');
+  setTimeout(()=>{ b.textContent='Copiar y siguiente ▸'; b.classList.remove('done'); }, 1400);
+  const dc=document.getElementById('datosCard'); if(dc) dc.scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+// Salto rápido con Enter entre los campos del Paso 3
+(function(){
+  const order=['edad','cama','fc','fr','sat'];
+  order.forEach((id,i)=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.setAttribute('enterkeyhint', i<order.length-1?'next':'done');
+    el.addEventListener('keydown', ev=>{
+      if(ev.key==='Enter'){ ev.preventDefault(); const nx=document.getElementById(order[i+1]); if(nx) nx.focus(); else el.blur(); }
+    });
+  });
+})();
 
 document.getElementById('clearBtn').addEventListener('click', ()=>{
   if(!confirm('¿Limpiar todo el formulario?')) return;
@@ -629,58 +732,83 @@ document.getElementById('clearBtn').addEventListener('click', ()=>{
   Object.keys(state.multi).forEach(k=>state.multi[k]=[]);
   document.getElementById('o2box').style.display='none';
   document.getElementById('tolvitals').style.display='none';
+  currentProfile=null; currentObs='';
+  currentRespType=null;
+  document.querySelectorAll('#resptypes .preset').forEach(b=>b.classList.remove('active'));
   render();
 });
 
 const PRESETS = {
-  'Respiratorio agudo':{
-    dx:'neumonía (CIE-11 CA40)',
+  'Neurológico':{
+    dx:'__otro__', dxText:'',
     single:{vent:'aire',conc:'alerta',com:'conservada',ori:'orientado en las 3 esferas',
-      exp:'disminuida',torax:'simétrico',ritmo:'regular',patron:'costal superior',
-      acc:'sin uso de musculatura accesoria y sin tirajes',mv:'conservado',ruidos:'con crépitos',
-      tol:'tolera adecuadamente',svses:'con cambios',dfat:'no presentó'},
-    multi:{estructura:['pulmones, incluyendo árbol bronquial y alvéolos (s4301)','sistema respiratorio (s430)'],
-      sistemas:['pulmonar / respiratorio','cardiovascular'],
-      categorias:['ventilación y respiración','capacidad aeróbica y resistencia'],
-      actividad:['andar (d450)','desplazarse por distintos lugares (d460)'],
-      riesgos:['broncoaspiración','retención de secreciones o tapón mucoso','desaturación e hipoxemia'],
-      campo:['ambos campos pulmonares'],
-      obj_resp:['optimizar el patrón ventilatorio','prevenir complicaciones respiratorias asociadas al reposo','favorecer la reexpansión pulmonar','permeabilizar la vía aérea y movilizar secreciones'],
-      obj_fis:['prevenir el desacondicionamiento físico'],
-      pm_resp:['reexpansión torácica','incentivo respiratorio','reeducación diafragmática'],pm_fis:[],
-      plan:['terapia respiratoria','oximetría'],
-      edu:['técnicas de respiración y reeducación diafragmática','técnica de tos efectiva y movilización de secreciones','continuidad del plan de ejercicios'],
-      deja:['en cama con barandas arriba','con la cama en posición baja y freno activado','con el timbre de llamado al alcance','con cabecera elevada (semi-Fowler, 30–45°)']}
-  },
-  'Respiratorio crónico':{
-    dx:'enfermedad pulmonar obstructiva crónica – EPOC (CIE-11 CA22)',
-    single:{vent:'aire',conc:'alerta',com:'conservada',ori:'orientado en las 3 esferas',
-      exp:'disminuida',torax:'simétrico',ritmo:'regular',patron:'costal superior',
-      acc:'con uso de musculatura accesoria y tirajes',mv:'disminuido',ruidos:'con roncus',
-      tol:'tolera adecuadamente',svses:'sin cambios',dfat:'no presentó'},
-    multi:{estructura:['pulmones, incluyendo árbol bronquial y alvéolos (s4301)','músculos de la respiración (s4303)'],
-      sistemas:['pulmonar / respiratorio','cardiovascular'],
-      categorias:['ventilación y respiración','capacidad aeróbica y resistencia','rendimiento muscular'],
-      actividad:['andar (d450)','desplazarse fuera del hogar (d4602)','realización de quehaceres domésticos (d640)','esparcimiento y tiempo libre (d920)'],
-      riesgos:['retención de secreciones o tapón mucoso','desaturación e hipoxemia','intolerancia al ejercicio','fatiga de la musculatura respiratoria'],
-      campo:['ambos campos pulmonares'],
-      obj_resp:['optimizar el patrón ventilatorio','permeabilizar la vía aérea y movilizar secreciones','fortalecer la musculatura respiratoria','disminuir el trabajo respiratorio'],
-      obj_fis:['prevenir el desacondicionamiento físico','mantener e incrementar la fuerza muscular','favorecer la movilización temprana y la independencia funcional'],
-      pm_resp:['higiene bronquial','reeducación diafragmática','ejercicios respiratorios con MsSs'],
-      pm_fis:['ejercicios de fortalecimiento','reeducación de marcha'],
-      plan:['terapia respiratoria','oximetría','reevaluación siguiente sesión'],
-      edu:['técnicas de respiración y reeducación diafragmática','técnicas de conservación de energía y dosificación de la actividad','posiciones facilitadoras para el alivio de la disnea','uso correcto de inhaladores o nebulizadores y adherencia a la terapia inhalada','reconocimiento de signos de alarma'],
-      deja:['en cama con barandas arriba','con la cama en posición baja y freno activado','con el timbre de llamado al alcance','con cabecera elevada (semi-Fowler, 30–45°)','confortable y sin disnea']}
-  },
-  'Post-quirúrgico MI':{
-    dx:'__otro__', dxText:'T845 – Infección de prótesis articular interna',
-    single:{vent:'aire',conc:'alerta',com:'conservada',ori:'orientado en las 3 esferas',
-      torax:'simétrico',ritmo:'regular',patron:'costodiafragmático',
+      llencap:'normal (menor a 2 segundos)',exp:'conservada',torax:'simétrico',ritmo:'regular',patron:'costodiafragmático',
       acc:'sin uso de musculatura accesoria y sin tirajes',mv:'conservado',ruidos:'sin ruidos agregados',
       tol:'tolera adecuadamente',svses:'sin cambios',dfat:'no presentó'},
-    multi:{estructura:[],sistemas:['musculoesquelético'],
-      categorias:['dolor','integridad y movilidad articular','marcha','rango de movimiento'],
-      actividad:['andar (d450)','transferir el propio cuerpo (d420)','desplazarse fuera del hogar (d4602)'],
+    multi:{estructura:['cerebro (s110)','médula espinal y estructuras relacionadas (s120)','nervios raquídeos (s1201)'],
+      sistemas:['neuromuscular','nervioso'],
+      categorias:['función motora','equilibrio','marcha','movilidad y locomoción'],
+      actividad:['cambiar las posturas corporales básicas (d410)','transferir el propio cuerpo (d420)','andar (d450)','desplazarse por distintos lugares (d460)'],
+      riesgos:['caída','úlceras por presión','broncoaspiración'],
+      campo:['ambos campos pulmonares'],
+      obj_resp:['prevenir complicaciones respiratorias asociadas al reposo'],
+      obj_fis:['mantener e incrementar la fuerza muscular','reeducar el equilibrio y las reacciones posturales','reeducar la marcha y las transferencias','prevenir el desacondicionamiento físico','favorecer la movilización temprana y la independencia funcional'],
+      pm_resp:[],
+      pm_fis:['movilizaciones activo-asistidas','ejercicios de fortalecimiento','cambios de posición','sedestación al borde de cama','reeducación de marcha'],
+      plan:['continuar movilización por turno','reevaluación siguiente sesión'],
+      edu:['prevención de úlceras por presión','prevención de caídas y medidas de seguridad','adherencia al tratamiento y participación activa'],
+      deja:['en cama con barandas arriba','con la cama en posición baja y freno activado','con el timbre de llamado al alcance']}
+  },
+  'Corazón y circulatorio':{
+    dx:'__otro__', dxText:'',
+    single:{vent:'aire',conc:'alerta',com:'conservada',ori:'orientado en las 3 esferas',
+      llencap:'prolongado (mayor a 2 segundos)',exp:'conservada',torax:'simétrico',ritmo:'regular',patron:'costodiafragmático',
+      acc:'sin uso de musculatura accesoria y sin tirajes',mv:'conservado',ruidos:'sin ruidos agregados',
+      tol:'tolera adecuadamente',svses:'sin cambios',dfat:'no presentó'},
+    multi:{estructura:['corazón (s4100)','arterias (s4101)','venas (s4102)','sistema cardiovascular (s410)'],
+      sistemas:['cardiovascular'],
+      categorias:['circulación (arterial, venosa y linfática)','capacidad aeróbica y resistencia','ventilación y respiración'],
+      actividad:['andar (d450)','desplazarse fuera del hogar (d4602)','realización de quehaceres domésticos (d640)','cuidado de la propia salud (d5701)'],
+      riesgos:['intolerancia al ejercicio','trombosis venosa profunda','desaturación e hipoxemia'],
+      campo:['ambos campos pulmonares'],
+      obj_resp:['optimizar el intercambio gaseoso y la oxigenación','prevenir complicaciones respiratorias asociadas al reposo'],
+      obj_fis:['prevenir el desacondicionamiento físico','mantener e incrementar la fuerza muscular','favorecer la movilización temprana y la independencia funcional'],
+      pm_resp:['ejercicios respiratorios con MsSs'],
+      pm_fis:['movilizaciones activas','ejercicios de fortalecimiento','sedestación al borde de cama','bipedestación asistida','reeducación de marcha'],
+      plan:['oximetría','continuar movilización por turno','reevaluación siguiente sesión'],
+      edu:['técnicas de conservación de energía y dosificación de la actividad','reconocimiento de signos de alarma','adherencia al tratamiento y participación activa'],
+      deja:['en cama con barandas arriba','con la cama en posición baja y freno activado','con el timbre de llamado al alcance','con monitorización de signos vitales']}
+  },
+  'Pulmonar':{
+    dx:'', 
+    single:{vent:'aire',conc:'alerta',com:'conservada',ori:'orientado en las 3 esferas',
+      llencap:'normal (menor a 2 segundos)',exp:'disminuida',torax:'simétrico',ritmo:'regular',patron:'costal superior',
+      acc:'con uso de musculatura accesoria y tirajes',mv:'disminuido',ruidos:'con sibilancias',
+      tol:'tolera adecuadamente',svses:'con cambios',dfat:'no presentó'},
+    multi:{estructura:['pulmones, incluyendo árbol bronquial y alvéolos (s4301)','sistema respiratorio (s430)','músculos de la respiración (s4303)'],
+      sistemas:['pulmonar / respiratorio','cardiovascular'],
+      categorias:['ventilación y respiración','capacidad aeróbica y resistencia'],
+      actividad:['andar (d450)','desplazarse por distintos lugares (d460)','realización de quehaceres domésticos (d640)'],
+      riesgos:['retención de secreciones o tapón mucoso','desaturación e hipoxemia','broncoaspiración','fatiga de la musculatura respiratoria'],
+      campo:['ambos campos pulmonares'],
+      obj_resp:['optimizar el patrón ventilatorio','permeabilizar la vía aérea y movilizar secreciones','favorecer la reexpansión pulmonar','favorecer la higiene bronquial','disminuir el trabajo respiratorio'],
+      obj_fis:['prevenir el desacondicionamiento físico','favorecer la movilización temprana y la independencia funcional'],
+      pm_resp:['higiene bronquial','reexpansión torácica','incentivo respiratorio','reeducación diafragmática','técnica de aceleración del flujo espiratorio','inhaloterapia'],
+      pm_fis:['ejercicios de fortalecimiento','reeducación de marcha'],
+      plan:['terapia respiratoria','oximetría','reevaluación siguiente sesión'],
+      edu:['técnicas de respiración y reeducación diafragmática','técnica de tos efectiva y movilización de secreciones','técnicas de conservación de energía y dosificación de la actividad','posiciones facilitadoras para el alivio de la disnea','uso correcto de inhaladores o nebulizadores y adherencia a la terapia inhalada'],
+      deja:['en cama con barandas arriba','con la cama en posición baja y freno activado','con el timbre de llamado al alcance','con cabecera elevada (semi-Fowler, 30–45°)']}
+  },
+  'Osteomuscular':{
+    dx:'__otro__', dxText:'',
+    single:{vent:'aire',conc:'alerta',com:'conservada',ori:'orientado en las 3 esferas',
+      llencap:'normal (menor a 2 segundos)',exp:'conservada',torax:'simétrico',ritmo:'regular',patron:'costodiafragmático',
+      acc:'sin uso de musculatura accesoria y sin tirajes',mv:'conservado',ruidos:'sin ruidos agregados',
+      tol:'tolera adecuadamente',svses:'sin cambios',dfat:'no presentó'},
+    multi:{estructura:['huesos (s7700)','articulaciones (s7701)','músculos (s7702)'],
+      sistemas:['musculoesquelético'],
+      categorias:['dolor','integridad y movilidad articular','rango de movimiento','rendimiento muscular','marcha','postura'],
+      actividad:['cambiar las posturas corporales básicas (d410)','transferir el propio cuerpo (d420)','andar (d450)','desplazarse fuera del hogar (d4602)'],
       riesgos:['caída','trombosis venosa profunda'],
       campo:['ambos campos pulmonares'],
       obj_resp:['prevenir complicaciones respiratorias asociadas al reposo'],
@@ -691,34 +819,330 @@ const PRESETS = {
       edu:['importancia de la movilización temprana','prevención de caídas y medidas de seguridad','continuidad del plan de ejercicios'],
       deja:['en cama con barandas arriba','con la cama en posición baja y freno activado','con el timbre de llamado al alcance']}
   },
-  'Neurológico':{
+  'Renal':{
     dx:'__otro__', dxText:'',
     single:{vent:'aire',conc:'alerta',com:'conservada',ori:'orientado en las 3 esferas',
-      torax:'simétrico',ritmo:'regular',patron:'costodiafragmático',
+      llencap:'normal (menor a 2 segundos)',exp:'conservada',torax:'simétrico',ritmo:'regular',patron:'costodiafragmático',
       acc:'sin uso de musculatura accesoria y sin tirajes',mv:'conservado',ruidos:'sin ruidos agregados',
       tol:'tolera adecuadamente',svses:'sin cambios',dfat:'no presentó'},
-    multi:{estructura:[],sistemas:['neuromuscular','nervioso'],
-      categorias:['marcha','equilibrio','función motora','movilidad y locomoción'],
-      actividad:['andar (d450)','cambiar las posturas corporales básicas (d410)','transferir el propio cuerpo (d420)'],
-      riesgos:['caída','úlceras por presión','broncoaspiración'],
+    multi:{estructura:['riñón (s6100)','sistema urinario (s610)'],
+      sistemas:['genitourinario / renal','cardiovascular'],
+      categorias:['capacidad aeróbica y resistencia','rendimiento muscular','características antropométricas','circulación (arterial, venosa y linfática)'],
+      actividad:['andar (d450)','realización de quehaceres domésticos (d640)','cuidado de la propia salud (d5701)','desplazarse fuera del hogar (d4602)'],
+      riesgos:['intolerancia al ejercicio','desaturación e hipoxemia','trombosis venosa profunda'],
       campo:['ambos campos pulmonares'],
       obj_resp:['prevenir complicaciones respiratorias asociadas al reposo'],
-      obj_fis:['mantener e incrementar la fuerza muscular','reeducar el equilibrio y las reacciones posturales','reeducar la marcha y las transferencias','prevenir el desacondicionamiento físico','favorecer la movilización temprana y la independencia funcional'],
-      pm_resp:[],
-      pm_fis:['movilizaciones activo-asistidas','ejercicios de fortalecimiento','cambios de posición','sedestación al borde de cama','reeducación de marcha'],
+      obj_fis:['prevenir el desacondicionamiento físico','mantener e incrementar la fuerza muscular','favorecer la movilización temprana y la independencia funcional'],
+      pm_resp:['ejercicios respiratorios con MsSs'],
+      pm_fis:['movilizaciones activas','ejercicios de fortalecimiento','sedestación al borde de cama','bipedestación asistida','reeducación de marcha'],
       plan:['continuar movilización por turno','reevaluación siguiente sesión'],
-      edu:['prevención de úlceras por presión','prevención de caídas y medidas de seguridad','adherencia al tratamiento y participación activa'],
+      edu:['técnicas de conservación de energía y dosificación de la actividad','importancia de la movilización temprana','adherencia al tratamiento y participación activa'],
       deja:['en cama con barandas arriba','con la cama en posición baja y freno activado','con el timbre de llamado al alcance']}
   }
 };
 
+
+// ====== MOTOR DE VARIACIÓN: 4 versiones por sistema (plan de manejo, plan, educación, observaciones) ======
+const VARIANTS = {
+  'Neurológico':{
+    objFis:[
+      ['mantener e incrementar la fuerza muscular','reeducar el equilibrio y las reacciones posturales'],
+      ['reeducar la marcha y las transferencias','favorecer la movilización temprana y la independencia funcional'],
+      ['prevenir el desacondicionamiento físico','mantener e incrementar la fuerza muscular'],
+      ['reeducar el equilibrio y las reacciones posturales','reeducar la marcha y las transferencias'],
+      ['preservar y mejorar los rangos de movimiento articular','mantener e incrementar la fuerza muscular'],
+      ['favorecer la movilización temprana y la independencia funcional','prevenir complicaciones del reposo prolongado']
+    ],
+    pmFis:[
+      ['movilizaciones pasivas','cambios de posición','sedestación al borde de cama'],
+      ['movilizaciones activo-asistidas','ejercicios de fortalecimiento','reeducación de marcha'],
+      ['cambios de posición','sedestación al borde de cama','bipedestación asistida'],
+      ['movilizaciones activas','ejercicios de fortalecimiento','reeducación de marcha'],
+      ['movilizaciones pasivas','movilizaciones activo-asistidas','cambios de posición'],
+      ['sedestación al borde de cama','bipedestación asistida','reeducación de marcha']
+    ],
+    plan:[
+      ['continuar movilización por turno','reevaluación siguiente sesión'],
+      ['continuar movilización por turno','reeducación de marcha'],
+      ['reeducación de marcha','reevaluación siguiente sesión'],
+      ['continuar movilización por turno'],
+      ['continuar movilización por turno','reevaluación siguiente sesión'],
+      ['reeducación de marcha','reevaluación siguiente sesión']
+    ],
+    educacion:[
+      ['prevención de úlceras por presión','prevención de caídas y medidas de seguridad'],
+      ['importancia de la movilización temprana','adherencia al tratamiento y participación activa'],
+      ['continuidad del plan de ejercicios','prevención de caídas y medidas de seguridad'],
+      ['prevención de úlceras por presión','importancia de la movilización temprana','reconocimiento de signos de alarma'],
+      ['prevención de úlceras por presión','adherencia al tratamiento y participación activa'],
+      ['importancia de la movilización temprana','continuidad del plan de ejercicios']
+    ],
+    observaciones:[
+      'El paciente responde a estímulos y colabora parcialmente con las indicaciones; se favorece el control motor y las reacciones posturales.',
+      'Se evidencia adecuada alineación postural durante las transiciones; se refuerza el trabajo de equilibrio en sedestación.',
+      'Paciente con tendencia a la fatiga; se dosifica la actividad y se prioriza la seguridad durante las transferencias.',
+      'Durante la sesión se observa progreso en el control de tronco y en la participación activa; se continúa la reeducación de la marcha.',
+      'El paciente mantiene la sedestación con supervisión; se estimulan las reacciones de enderezamiento y el control cefálico.',
+      'Se observa mejor tolerancia a la bipedestación asistida; se progresa gradualmente hacia la marcha con apoyo.'
+    ]
+  },
+  'Corazón y circulatorio':{
+    objFis:[
+      ['prevenir el desacondicionamiento físico','mantener e incrementar la fuerza muscular'],
+      ['favorecer la movilización temprana y la independencia funcional','mantener e incrementar la fuerza muscular'],
+      ['prevenir complicaciones del reposo prolongado','prevenir el desacondicionamiento físico'],
+      ['mantener e incrementar la fuerza muscular','reeducar la marcha y las transferencias'],
+      ['prevenir el desacondicionamiento físico','favorecer la movilización temprana y la independencia funcional'],
+      ['reeducar la marcha y las transferencias','mantener e incrementar la fuerza muscular']
+    ],
+    pmFis:[
+      ['movilizaciones activas','sedestación al borde de cama'],
+      ['ejercicios de fortalecimiento','bipedestación asistida','reeducación de marcha'],
+      ['movilizaciones activo-asistidas','cambios de posición','sedestación al borde de cama'],
+      ['movilizaciones activas','ejercicios de fortalecimiento','reeducación de marcha'],
+      ['sedestación al borde de cama','bipedestación asistida','ejercicios de fortalecimiento'],
+      ['movilizaciones activas','reeducación de marcha']
+    ],
+    plan:[
+      ['oximetría','continuar movilización por turno','reevaluación siguiente sesión'],
+      ['continuar movilización por turno','reeducación de marcha'],
+      ['oximetría','reevaluación siguiente sesión'],
+      ['continuar movilización por turno','reevaluación siguiente sesión'],
+      ['oximetría','continuar movilización por turno'],
+      ['reeducación de marcha','reevaluación siguiente sesión']
+    ],
+    educacion:[
+      ['técnicas de conservación de energía y dosificación de la actividad','reconocimiento de signos de alarma'],
+      ['adherencia al tratamiento y participación activa','importancia de la movilización temprana'],
+      ['reconocimiento de signos de alarma','continuidad del plan de ejercicios'],
+      ['técnicas de conservación de energía y dosificación de la actividad','prevención de caídas y medidas de seguridad'],
+      ['reconocimiento de signos de alarma','adherencia al tratamiento y participación activa'],
+      ['técnicas de conservación de energía y dosificación de la actividad','continuidad del plan de ejercicios']
+    ],
+    observaciones:[
+      'El paciente tolera la actividad con adecuada respuesta hemodinámica; se vigilan signos de intolerancia al esfuerzo.',
+      'Se progresa la carga de forma gradual según la respuesta cardiovascular, sin signos de descompensación durante la sesión.',
+      'Paciente con leve fatiga al esfuerzo; se dosifica la actividad y se monitorizan la frecuencia cardíaca y la saturación.',
+      'Durante la intervención se observa adecuada recuperación tras el ejercicio; se continúa el acondicionamiento progresivo.',
+      'El paciente conserva cifras tensionales estables durante la movilización; se continúa el acondicionamiento cardiovascular progresivo.',
+      'Se evidencia mejor tolerancia al esfuerzo respecto a sesiones previas; sin disnea ni dolor torácico durante la actividad.'
+    ]
+  },
+  'Pulmonar':{
+    objFis:[
+      ['prevenir el desacondicionamiento físico','favorecer la movilización temprana y la independencia funcional'],
+      ['mantener e incrementar la fuerza muscular','prevenir el desacondicionamiento físico'],
+      ['favorecer la movilización temprana y la independencia funcional','prevenir complicaciones del reposo prolongado'],
+      ['prevenir el desacondicionamiento físico','reeducar la marcha y las transferencias'],
+      ['mantener e incrementar la fuerza muscular','favorecer la movilización temprana y la independencia funcional'],
+      ['prevenir complicaciones del reposo prolongado','prevenir el desacondicionamiento físico']
+    ],
+    pmFis:[
+      ['ejercicios de fortalecimiento'],
+      ['sedestación al borde de cama','reeducación de marcha'],
+      ['movilizaciones activas'],
+      ['bipedestación asistida','ejercicios de fortalecimiento'],
+      ['sedestación al borde de cama','ejercicios de fortalecimiento'],
+      ['movilizaciones activas','reeducación de marcha']
+    ],
+    plan:[
+      ['terapia respiratoria','oximetría','reevaluación siguiente sesión'],
+      ['terapia respiratoria','continuar movilización por turno'],
+      ['terapia respiratoria','oximetría'],
+      ['terapia respiratoria','reeducación de marcha','reevaluación siguiente sesión'],
+      ['terapia respiratoria','oximetría','continuar movilización por turno'],
+      ['terapia respiratoria','reevaluación siguiente sesión']
+    ],
+    educacion:[
+      ['técnicas de respiración y reeducación diafragmática','técnica de tos efectiva y movilización de secreciones'],
+      ['técnicas de conservación de energía y dosificación de la actividad','posiciones facilitadoras para el alivio de la disnea'],
+      ['uso correcto de inhaladores o nebulizadores y adherencia a la terapia inhalada','reconocimiento de signos de alarma'],
+      ['continuidad del plan de ejercicios','importancia de la movilización temprana','prevención de caídas y medidas de seguridad'],
+      ['técnica de tos efectiva y movilización de secreciones','posiciones facilitadoras para el alivio de la disnea'],
+      ['técnicas de respiración y reeducación diafragmática','uso correcto de inhaladores o nebulizadores y adherencia a la terapia inhalada']
+    ],
+    observaciones:[
+      'El paciente participa activamente durante la sesión de terapia respiratoria, con adecuada mecánica ventilatoria y sin desaturación significativa.',
+      'Se observa disminución del trabajo respiratorio tras las técnicas aplicadas; se favorece la eliminación de secreciones de forma efectiva.',
+      'Paciente colaborador, tolera la movilización de secreciones; se recomienda mantener la hidratación y el posicionamiento para optimizar el drenaje.',
+      'Durante la intervención se evidencia mejoría de la expansión torácica y del patrón ventilatorio; se continúa el plan orientado a la reexpansión pulmonar.',
+      'El paciente logra una tos más efectiva tras las técnicas aplicadas, con mejor manejo de secreciones.',
+      'Se observa mejoría de la saturación y del patrón respiratorio durante la sesión; se refuerza la técnica ventilatoria.'
+    ]
+  },
+  'Osteomuscular':{
+    objFis:[
+      ['preservar y mejorar los rangos de movimiento articular','mantener e incrementar la fuerza muscular'],
+      ['mantener e incrementar la fuerza muscular','reeducar la marcha y las transferencias'],
+      ['manejar y disminuir el dolor','preservar y mejorar los rangos de movimiento articular'],
+      ['reeducar la marcha y las transferencias','favorecer la movilización temprana y la independencia funcional'],
+      ['manejar y disminuir el dolor','mantener e incrementar la fuerza muscular'],
+      ['preservar y mejorar los rangos de movimiento articular','favorecer la movilización temprana y la independencia funcional']
+    ],
+    pmFis:[
+      ['movilizaciones activo-asistidas','ejercicios de fortalecimiento'],
+      ['ejercicios de fortalecimiento','sedestación al borde de cama','bipedestación asistida','reeducación de marcha'],
+      ['movilizaciones activas','ejercicios de fortalecimiento','reeducación de marcha'],
+      ['movilizaciones pasivas','movilizaciones activo-asistidas','cambios de posición'],
+      ['ejercicios de fortalecimiento','bipedestación asistida','reeducación de marcha'],
+      ['movilizaciones activo-asistidas','ejercicios de fortalecimiento','sedestación al borde de cama']
+    ],
+    plan:[
+      ['continuar movilización por turno','reeducación de marcha','reevaluación siguiente sesión'],
+      ['reeducación de marcha','reevaluación siguiente sesión'],
+      ['continuar movilización por turno','reeducación de marcha'],
+      ['continuar movilización por turno','reevaluación siguiente sesión'],
+      ['reeducación de marcha','continuar movilización por turno'],
+      ['continuar movilización por turno','reevaluación siguiente sesión']
+    ],
+    educacion:[
+      ['importancia de la movilización temprana','prevención de caídas y medidas de seguridad'],
+      ['continuidad del plan de ejercicios','adherencia al tratamiento y participación activa'],
+      ['prevención de caídas y medidas de seguridad','continuidad del plan de ejercicios'],
+      ['importancia de la movilización temprana','reconocimiento de signos de alarma'],
+      ['continuidad del plan de ejercicios','prevención de caídas y medidas de seguridad'],
+      ['importancia de la movilización temprana','adherencia al tratamiento y participación activa']
+    ],
+    observaciones:[
+      'El paciente realiza los ejercicios dentro de los arcos permitidos, con dolor controlado durante la sesión.',
+      'Se evidencia mejoría en la movilidad articular y en la fuerza; se progresa la carga según tolerancia.',
+      'Paciente colaborador; se refuerza la técnica de transferencias seguras y el manejo del dolor.',
+      'Durante la intervención se observa un mejor patrón de marcha con asistencia; se continúa el fortalecimiento progresivo.',
+      'El paciente incrementa la tolerancia a los ejercicios resistidos; se ajusta la progresión según el dolor referido.',
+      'Se evidencia mayor independencia en las transferencias; se continúa el entrenamiento de la marcha con asistencia.'
+    ]
+  },
+  'Renal':{
+    objFis:[
+      ['prevenir el desacondicionamiento físico','mantener e incrementar la fuerza muscular'],
+      ['favorecer la movilización temprana y la independencia funcional','mantener e incrementar la fuerza muscular'],
+      ['prevenir complicaciones del reposo prolongado','prevenir el desacondicionamiento físico'],
+      ['mantener e incrementar la fuerza muscular','reeducar la marcha y las transferencias'],
+      ['prevenir el desacondicionamiento físico','favorecer la movilización temprana y la independencia funcional'],
+      ['reeducar la marcha y las transferencias','prevenir el desacondicionamiento físico']
+    ],
+    pmFis:[
+      ['movilizaciones activas','ejercicios de fortalecimiento','sedestación al borde de cama'],
+      ['ejercicios de fortalecimiento','bipedestación asistida','reeducación de marcha'],
+      ['movilizaciones activo-asistidas','cambios de posición','sedestación al borde de cama'],
+      ['movilizaciones activas','ejercicios de fortalecimiento','reeducación de marcha'],
+      ['sedestación al borde de cama','bipedestación asistida','ejercicios de fortalecimiento'],
+      ['movilizaciones activas','reeducación de marcha']
+    ],
+    plan:[
+      ['continuar movilización por turno','reevaluación siguiente sesión'],
+      ['continuar movilización por turno','reeducación de marcha'],
+      ['oximetría','reevaluación siguiente sesión'],
+      ['continuar movilización por turno'],
+      ['continuar movilización por turno','reevaluación siguiente sesión'],
+      ['reeducación de marcha','reevaluación siguiente sesión']
+    ],
+    educacion:[
+      ['técnicas de conservación de energía y dosificación de la actividad','importancia de la movilización temprana'],
+      ['adherencia al tratamiento y participación activa','reconocimiento de signos de alarma'],
+      ['continuidad del plan de ejercicios','importancia de la movilización temprana'],
+      ['técnicas de conservación de energía y dosificación de la actividad','prevención de caídas y medidas de seguridad'],
+      ['adherencia al tratamiento y participación activa','importancia de la movilización temprana'],
+      ['continuidad del plan de ejercicios','técnicas de conservación de energía y dosificación de la actividad']
+    ],
+    observaciones:[
+      'El paciente tolera la actividad física adaptada; se dosifica según la fatiga y el estado general.',
+      'Se observa disposición a la movilización; se favorece el acondicionamiento para contrarrestar el desacondicionamiento.',
+      'Paciente con fatigabilidad; se ajusta la intensidad y se prioriza la seguridad durante las transferencias.',
+      'Durante la sesión se evidencia adecuada participación; se continúa el fortalecimiento y la reeducación de la marcha.',
+      'El paciente tolera la sesión pese a la fatiga propia de su condición; se prioriza la eficiencia del esfuerzo.',
+      'Se observa adecuada respuesta a la movilización activa; se continúa el fortalecimiento y el acondicionamiento general.'
+    ]
+  }
+};
+
+// ====== TIPOS DE PACIENTE RESPIRATORIO: ajustan objetivos y tratamiento respiratorio ======
+const RESP_TYPES = {
+  'Sin dispositivos':{
+    vent:'aire',
+    obj_resp:['prevenir complicaciones respiratorias asociadas al reposo','favorecer la reexpansión pulmonar','fortalecer la musculatura respiratoria'],
+    pm_resp:['reexpansión torácica','incentivo respiratorio','reeducación diafragmática']
+  },
+  'Solo O₂':{
+    vent:'oxigeno', o2sys:'cánula nasal',
+    obj_resp:['optimizar el intercambio gaseoso y la oxigenación','prevenir complicaciones respiratorias asociadas al reposo','favorecer la reexpansión pulmonar'],
+    pm_resp:['reexpansión torácica','incentivo respiratorio','ejercicios respiratorios con MsSs']
+  },
+  'Solo inhaladores':{
+    vent:'aire',
+    obj_resp:['favorecer la broncodilatación mediante inhaloterapia','optimizar el intercambio gaseoso y la oxigenación','mejorar la eficacia de la tos'],
+    pm_resp:['inhaloterapia','ejercicios respiratorios con MsSs','incentivo respiratorio']
+  },
+  'Inhaladores + O₂':{
+    vent:'oxigeno', o2sys:'cánula nasal',
+    obj_resp:['favorecer la broncodilatación mediante inhaloterapia','optimizar el intercambio gaseoso y la oxigenación','permeabilizar la vía aérea y movilizar secreciones'],
+    pm_resp:['inhaloterapia','higiene bronquial','reexpansión torácica','incentivo respiratorio']
+  },
+  'Con secreciones / succión':{
+    obj_resp:['permeabilizar la vía aérea y movilizar secreciones','disminuir el trabajo respiratorio','favorecer la higiene bronquial'],
+    pm_resp:['aspiración de secreciones','higiene bronquial','técnica de aceleración del flujo espiratorio','puño percusión']
+  }
+};
+
+let currentProfile = null;
+let currentObs = '';
+const memIdx = {};
+function getIdx(name){ try{ return parseInt(localStorage.getItem('vidx_'+name)||'0',10)||0; }catch(e){ return memIdx[name]||0; } }
+function setIdx(name,v){ try{ localStorage.setItem('vidx_'+name, String(v)); }catch(e){ memIdx[name]=v; } }
+function setMulti(key, arr){
+  const g=document.querySelector('[data-multi="'+key+'"]'); if(!g) return;
+  g.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  state.multi[key]=[...arr];
+  arr.forEach(v=>{ g.querySelectorAll('.chip').forEach(c=>{ if(c.dataset.v===v) c.classList.add('on'); }); });
+}
+function markSingle(key, v){
+  const g=document.querySelector('[data-single="'+key+'"]'); if(!g) return;
+  g.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  g.querySelectorAll('.chip').forEach(c=>{ if(c.dataset.v===v) c.classList.add('on'); });
+  state.single[key]=v;
+}
+function applyVariant(name, idx){
+  const V = VARIANTS[name]; if(!V) return;
+  const n = V.plan.length;
+  const i = ((idx % n)+n)%n;
+  setMulti('obj_fis', V.objFis[i]);
+  setMulti('pm_fis', V.pmFis[i]);
+  setMulti('plan', V.plan[i]);
+  setMulti('edu', V.educacion[i]);
+  currentObs = V.observaciones[i];
+  render();
+}
+let currentRespType = null;
+function applyRespType(type){
+  const R = RESP_TYPES[type]; if(!R) return;
+  currentRespType = type;
+  if(R.vent!==undefined){
+    markSingle('vent', R.vent);
+    if(R.vent==='oxigeno') document.getElementById('o2sys').value = R.o2sys || 'cánula nasal';
+    document.getElementById('o2box').style.display = (R.vent==='oxigeno')?'grid':'none';
+  }
+  setMulti('obj_resp', R.obj_resp);
+  setMulti('pm_resp', R.pm_resp);
+  document.querySelectorAll('#resptypes .preset').forEach(b=>b.classList.toggle('active', b.textContent===type));
+  render();
+}
+
 const presetBox = document.getElementById('presets');
 Object.keys(PRESETS).forEach(name=>{
   const b=document.createElement('div'); b.className='preset'; b.textContent=name;
-  b.addEventListener('click', ()=>applyPreset(PRESETS[name]));
+  b.addEventListener('click', ()=>applyPreset(name, PRESETS[name]));
   presetBox.appendChild(b);
 });
-function applyPreset(p){
+const respBox = document.getElementById('resptypes');
+Object.keys(RESP_TYPES).forEach(name=>{
+  const b=document.createElement('div'); b.className='preset'; b.textContent=name;
+  b.addEventListener('click', ()=>applyRespType(name));
+  respBox.appendChild(b);
+});
+function applyPreset(name, p){
+  currentProfile = name;
+  currentRespType = null;
+  document.querySelectorAll('#resptypes .preset').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.chip.on').forEach(c=>c.classList.remove('on'));
   Object.keys(state.single).forEach(k=>state.single[k]=null);
   Object.keys(state.multi).forEach(k=>state.multi[k]=[]);
@@ -731,14 +1155,34 @@ function applyPreset(p){
   Object.entries(p.multi).forEach(([k,arr])=>{ state.multi[k]=[...arr]; arr.forEach(v=>markChip('multi',k,v)); });
   document.getElementById('o2box').style.display = (state.single.vent==='oxigeno')?'grid':'none';
   document.getElementById('tolvitals').style.display = (state.single.svses==='con cambios')?'grid':'none';
+  if(VARIANTS[name]){ const idx=getIdx(name); applyVariant(name, idx); setIdx(name, idx+1); }
   render();
-  window.scrollTo({top:0, behavior:'smooth'});
+  const dc=document.getElementById('datosCard'); if(dc) dc.scrollIntoView({behavior:'smooth',block:'start'});
 }
+document.getElementById('varyBtn').addEventListener('click', ()=>{
+  if(!currentProfile){ alert('Primero elige un perfil por sistema.'); return; }
+  const idx=getIdx(currentProfile); applyVariant(currentProfile, idx); setIdx(currentProfile, idx+1);
+});
 function markChip(type,key,v){
   const sel = type==='single'?`[data-single="${key}"]`:`[data-multi="${key}"]`;
   const g=document.querySelector(sel); if(!g) return;
   g.querySelectorAll('.chip').forEach(c=>{ if(c.dataset.v===v) c.classList.add('on'); });
 }
+
+// Secciones precargadas por el perfil: plegadas por defecto para agilizar el diligenciamiento
+document.querySelectorAll('.card').forEach(card=>{
+  const h2=card.querySelector('h2'); if(!h2) return;
+  const t=h2.textContent;
+  if(/Detalles CIF|Objetivos|Plan de manejo|Tolerancia|Plan y educación/.test(t)){
+    card.classList.add('collapsible','collapsed');
+    const body=document.createElement('div'); body.className='cardbody';
+    while(h2.nextSibling){ body.appendChild(h2.nextSibling); }
+    card.appendChild(body);
+    const car=document.createElement('span'); car.className='caret'; car.textContent='▸';
+    h2.appendChild(car);
+    h2.addEventListener('click', ()=>card.classList.toggle('collapsed'));
+  }
+});
 
 render();
 </script>
