@@ -123,6 +123,16 @@
       </select>
     </label>
     <label class="fld" id="dxOtroWrap" style="display:none"><span>Otro diagnóstico (código + texto)</span><input type="text" id="dxOtro" placeholder="T845 – Infección de prótesis articular interna"></label>
+    <div class="grid">
+      <div>
+        <div class="glabel">Tipo de nota</div>
+        <div class="chips" data-single="tiponota">
+          <div class="chip" data-v="valoración inicial">Valoración inicial</div>
+          <div class="chip" data-v="seguimiento">Seguimiento</div>
+        </div>
+      </div>
+      <label class="fld"><span>N.° de sesión</span><input type="number" id="sesion" inputmode="numeric" placeholder="1"></label>
+    </div>
     <div class="glabel" style="margin-top:6px">Signos vitales</div>
     <div class="grid3">
       <label class="fld"><span>FC (lpm)</span><input type="number" id="fc" inputmode="numeric" placeholder="59"></label>
@@ -238,7 +248,115 @@
       <div class="chip" data-v="con sibilancias">Sibilancias</div>
       <div class="chip" data-v="con estertores">Estertores</div>
     </div>
+    <div class="sub" style="margin-top:14px">Dispositivos y accesos</div>
+    <div class="chips" data-multi="disp">
+      <div class="chip" data-v="catéter venoso central">Catéter venoso central</div>
+      <div class="chip" data-v="catéter venoso periférico">Catéter venoso periférico</div>
+      <div class="chip" data-v="línea arterial">Línea arterial</div>
+      <div class="chip" data-v="bombas de infusión conectadas">Bombas de infusión</div>
+      <div class="chip" data-v="sonda vesical">Sonda vesical</div>
+      <div class="chip" data-v="sonda nasogástrica">Sonda nasogástrica</div>
+      <div class="chip" data-v="tubo orotraqueal">Tubo orotraqueal</div>
+      <div class="chip" data-v="traqueostomía">Traqueostomía</div>
+      <div class="chip" data-v="tubo de tórax">Tubo de tórax</div>
+      <div class="chip" data-v="catéter de diálisis">Catéter de diálisis</div>
+      <div class="chip" data-v="monitorización continua">Monitorización continua</div>
+      <div class="chip" data-v="marcapasos">Marcapasos</div>
+    </div>
   </div>
+
+  <div class="card">
+    <h2><span class="n">⚙</span>Valoración funcional <span style="font-weight:400;font-size:11px;color:#5a6b85">(equipo médico · valoración inicial)</span></h2>
+    <div class="sub">Respiratoria</div>
+    <div class="glabel">Reflejo de la tos</div>
+    <div class="chips" data-single="f_reflejo">
+      <div class="chip" data-v="reflejo de la tos presente">Presente</div>
+      <div class="chip" data-v="reflejo de la tos disminuido">Disminuido</div>
+      <div class="chip" data-v="reflejo de la tos ausente">Ausente</div>
+    </div>
+    <div class="glabel">Tos</div>
+    <div class="chips" data-single="f_tos">
+      <div class="chip" data-v="tos efectiva">Efectiva</div>
+      <div class="chip" data-v="tos inefectiva">Inefectiva</div>
+    </div>
+    <div class="glabel">Vía aérea</div>
+    <div class="chips" data-single="f_via">
+      <div class="chip" data-v="vía aérea permeable">Permeable</div>
+      <div class="chip" data-v="vía aérea parcialmente permeable">Parcial</div>
+      <div class="chip" data-v="vía aérea no permeable">No permeable</div>
+    </div>
+    <div class="glabel">Manejo de secreciones</div>
+    <div class="chips" data-single="f_secre">
+      <div class="chip" data-v="manejo autónomo de secreciones">Autónomo</div>
+      <div class="chip" data-v="manejo de secreciones con asistencia">Con asistencia</div>
+      <div class="chip" data-v="requiere aspiración de secreciones">Requiere aspiración</div>
+    </div>
+    <div class="glabel">Patrón ventilatorio</div>
+    <div class="chips" data-single="f_patron">
+      <div class="chip" data-v="patrón ventilatorio eficaz">Eficaz</div>
+      <div class="chip" data-v="patrón ventilatorio ineficaz">Ineficaz</div>
+    </div>
+    <div class="glabel">Riesgo de broncoaspiración</div>
+    <div class="chips" data-single="f_broncoasp">
+      <div class="chip" data-v="bajo riesgo de broncoaspiración">Bajo</div>
+      <div class="chip" data-v="alto riesgo de broncoaspiración">Alto</div>
+    </div>
+    <div class="sub" style="margin-top:12px">Física / funcional</div>
+    <div class="glabel">Deambulación</div>
+    <div class="chips" data-single="f_deamb">
+      <div class="chip" data-v="deambulación independiente">Independiente</div>
+      <div class="chip" data-v="deambulación con asistencia">Con asistencia</div>
+      <div class="chip" data-v="deambulación con ayuda técnica">Con ayuda técnica</div>
+      <div class="chip" data-v="no deambula">No deambula</div>
+    </div>
+    <div class="glabel">Transiciones</div>
+    <div class="chips" data-single="f_trans">
+      <div class="chip" data-v="transiciones independientes">Independientes</div>
+      <div class="chip" data-v="transiciones asistidas">Asistidas</div>
+      <div class="chip" data-v="no realiza transiciones">No realiza</div>
+    </div>
+    <div class="glabel">Cambios de posición en cama</div>
+    <div class="chips" data-single="f_cambios">
+      <div class="chip" data-v="cambios de posición autónomos">Autónomos</div>
+      <div class="chip" data-v="cambios de posición con asistencia">Con asistencia</div>
+      <div class="chip" data-v="dependiente para cambios de posición">Dependiente</div>
+    </div>
+    <div class="glabel">Sedestación</div>
+    <div class="chips" data-single="f_sed">
+      <div class="chip" data-v="tolera la sedestación">Tolera</div>
+      <div class="chip" data-v="no tolera la sedestación">No tolera</div>
+    </div>
+    <div class="glabel">Bipedestación</div>
+    <div class="chips" data-single="f_bip">
+      <div class="chip" data-v="tolera la bipedestación">Tolera</div>
+      <div class="chip" data-v="no tolera la bipedestación">No tolera</div>
+      <div class="chip" data-v="bipedestación no evaluada">No evaluada</div>
+    </div>
+    <div class="glabel">Fuerza muscular global</div>
+    <div class="chips" data-single="f_fuerza">
+      <div class="chip" data-v="fuerza muscular global conservada">Conservada</div>
+      <div class="chip" data-v="fuerza muscular global disminuida">Disminuida</div>
+    </div>
+    <div class="glabel">Equilibrio</div>
+    <div class="chips" data-single="f_equi">
+      <div class="chip" data-v="equilibrio conservado">Conservado</div>
+      <div class="chip" data-v="equilibrio alterado">Alterado</div>
+    </div>
+    <div class="glabel">Riesgo de caída</div>
+    <div class="chips" data-single="f_caida">
+      <div class="chip" data-v="bajo riesgo de caída">Bajo</div>
+      <div class="chip" data-v="alto riesgo de caída">Alto</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">⚙</span>Medición objetiva <span style="font-weight:400;font-size:11px;color:#5a6b85">(escalas · solo las aplicadas)</span></h2>
+    <div class="sub">Respiratorias / cardiorrespiratorias</div>
+    <div class="grid" id="scalesResp"></div>
+    <div class="sub" style="margin-top:12px">Físicas / funcionales</div>
+    <div class="grid" id="scalesFis"></div>
+  </div>
+
   <div class="card">
     <h2><span class="n">⚙</span>Detalles CIF <span style="font-weight:400;font-size:11px;color:#5a6b85">(precargado por el perfil)</span></h2>
 
@@ -265,6 +383,9 @@
       <div class="chip" data-v="hígado (s560)">Hígado <span class="code">s560</span></div>
       <div class="chip" data-v="vesícula biliar y conductos biliares (s570)">Vesícula biliar / conductos <span class="code">s570</span></div>
       <div class="chip" data-v="páncreas (s550)">Páncreas <span class="code">s550</span></div>
+      <div class="chip" data-v="estómago (s530)">Estómago <span class="code">s530</span></div>
+      <div class="chip" data-v="intestino (s540)">Intestino <span class="code">s540</span></div>
+      <div class="chip" data-v="esófago (s520)">Esófago <span class="code">s520</span></div>
       <div class="chip" data-v="cerebro (s110)">Cerebro <span class="code">s110</span></div>
       <div class="chip" data-v="tronco encefálico (s1104)">Tronco encefálico <span class="code">s1104</span></div>
       <div class="chip" data-v="cerebelo (s1105)">Cerebelo <span class="code">s1105</span></div>
@@ -360,6 +481,8 @@
       <div class="chip" data-v="úlceras por presión">UPP</div>
       <div class="chip" data-v="caída">Caída</div>
       <div class="chip" data-v="ansiedad asociada a la disnea">Ansiedad por disnea</div>
+      <div class="chip" data-v="hemorragia de vías digestivas">Hemorragia digestiva</div>
+      <div class="chip" data-v="sangrado activo">Sangrado activo</div>
     </div>
   </div>
 
@@ -527,11 +650,62 @@ document.querySelectorAll('.chips').forEach(group=>{
         if(i>=0) arr.splice(i,1); else arr.push(v);
       }
       if(single==='vent') document.getElementById('o2box').style.display = (state.single.vent==='oxigeno')?'grid':'none';
+      if(single==='tiponota'){ const fc=[...document.querySelectorAll('.card.collapsible')].find(c=>/Valoración funcional/.test(c.querySelector('h2').textContent)); if(fc) fc.classList.toggle('collapsed', state.single.tiponota!=='valoración inicial'); }
       if(single==='svses') document.getElementById('tolvitals').style.display = (state.single.svses==='con cambios')?'grid':'none';
       render();
     });
   });
 });
+
+// ====== Escalas de medición objetiva ======
+window.SCALES = {
+  resp:[
+    {key:'mmrc', short:'Disnea mMRC', ph:'0–4'},
+    {key:'borg', short:'Borg modif.', ph:'0–10'},
+    {key:'nyha', short:'NYHA', ph:'I–IV'},
+    {key:'pcf',  short:'PCF tos', ph:'L/min'},
+    {key:'pimax',short:'PImáx', ph:'cmH₂O'},
+    {key:'pemax',short:'PEmáx', ph:'cmH₂O'},
+    {key:'safi', short:'SaFi', ph:'SatO₂/FiO₂'},
+    {key:'pafi', short:'PaFi', ph:'PaO₂/FiO₂'},
+    {key:'rass', short:'RASS', ph:'−5 a +4'},
+    {key:'gcs',  short:'Glasgow', ph:'3–15'}
+  ],
+  fis:[
+    {key:'mrcss', short:'MRC-SS', ph:'0–60'},
+    {key:'dinamo',short:'Dinamometría', ph:'kg'},
+    {key:'ashworth',short:'Ashworth', ph:'0–4'},
+    {key:'barthel',short:'Barthel', ph:'0–100'},
+    {key:'fim',   short:'FIM', ph:'18–126'},
+    {key:'berg',  short:'Berg', ph:'0–56'},
+    {key:'tug',   short:'Timed Up and Go', ph:'s'},
+    {key:'gait',  short:'Velocidad marcha', ph:'m/s'},
+    {key:'sixmwt',short:'6MWT', ph:'m'},
+    {key:'twomst',short:'2-min step', ph:'pasos'},
+    {key:'fivetsts',short:'5STS', ph:'s'},
+    {key:'sppb',  short:'SPPB', ph:'0–12'},
+    {key:'ims',   short:'ICU Mobility (IMS)', ph:'0–10'},
+    {key:'fssicu',short:'FSS-ICU', ph:'0–35'},
+    {key:'perme', short:'Perme Score', ph:'0–32'},
+    {key:'eva',   short:'Dolor EVA', ph:'0–10'},
+    {key:'morse', short:'Morse', ph:'0–125'},
+    {key:'braden',short:'Braden', ph:'6–23'},
+    {key:'frail', short:'FRAIL', ph:'0–5'}
+  ]
+};
+(function(){
+  function fill(containerId, arr){
+    const c=document.getElementById(containerId); if(!c) return;
+    arr.forEach(sc=>{
+      const lab=document.createElement('label'); lab.className='fld';
+      lab.innerHTML='<span>'+sc.short+'</span><input type="text" id="scale_'+sc.key+'" inputmode="text" placeholder="'+sc.ph+'">';
+      c.appendChild(lab);
+    });
+  }
+  fill('scalesResp', window.SCALES.resp);
+  fill('scalesFis', window.SCALES.fis);
+})();
+
 document.querySelectorAll('input,select,textarea').forEach(el=>el.addEventListener('input', render));
 document.getElementById('dx').addEventListener('change', ()=>{
   document.getElementById('dxOtroWrap').style.display = (document.getElementById('dx').value==='__otro__')?'block':'none';
@@ -567,6 +741,8 @@ function render(){
   c += ', según la CIF.';
 
   let e = `Se valora paciente ${sexo} de ${edad} años de edad, con diagnóstico de ${dx}, ubicado en la cama ${cama}`;
+  if(s.tiponota){ e += `, en ${s.tiponota}`; if(val('sesion')) e += ` (sesión N.° ${val('sesion')})`; }
+  else if(val('sesion')) e += `, sesión N.° ${val('sesion')}`;
   if(s.vent==='aire') e += ', ventilando a aire ambiente';
   else if(s.vent==='oxigeno'){
     const flujo = val('o2flujo')?` a ${val('o2flujo')} L/min`:'';
@@ -598,14 +774,31 @@ function render(){
     if(s.ruidos) e += `, ${s.ruidos}`;
     e += '.';
   }
+  if(m.disp && m.disp.length) e += ` Porta los siguientes dispositivos y accesos: ${listJoin(m.disp)}.`;
 
   let obj = '';
   if(m.obj_resp.length) obj += `Terapia respiratoria: ${listJoin(m.obj_resp)}. `;
   if(m.obj_fis.length) obj += `Terapia física: ${listJoin(m.obj_fis)}.`;
 
+  // Valoración funcional (equipo médico)
+  const fresp = ['f_reflejo','f_tos','f_via','f_secre','f_patron','f_broncoasp'].map(k=>s[k]).filter(Boolean);
+  const ffis  = ['f_deamb','f_trans','f_cambios','f_sed','f_bip','f_fuerza','f_equi','f_caida'].map(k=>s[k]).filter(Boolean);
+  let func='';
+  if(fresp.length) func += `Respiratorio: ${listJoin(fresp)}. `;
+  if(ffis.length)  func += `Físico: ${listJoin(ffis)}.`;
+
+  // Medición objetiva (escalas aplicadas)
+  const escResp = (window.SCALES?window.SCALES.resp:[]).map(sc=>{ const v=val('scale_'+sc.key); return v?`${sc.short}: ${v}`:null; }).filter(Boolean);
+  const escFis  = (window.SCALES?window.SCALES.fis:[]).map(sc=>{ const v=val('scale_'+sc.key); return v?`${sc.short}: ${v}`:null; }).filter(Boolean);
+  let med='';
+  if(escResp.length) med += `Respiratorias — ${escResp.join('; ')}. `;
+  if(escFis.length)  med += `Físicas/funcionales — ${escFis.join('; ')}.`;
+
   P.push(['CONCLUSIÓN FISIOTERAPÉUTICA', c]);
   if(obj) P.push(['OBJETIVO DE TRATAMIENTO', obj.trim()]);
   P.push(['DESCRIPCIÓN DEL ESTADO DEL PACIENTE', e]);
+  if(func) P.push(['VALORACIÓN FUNCIONAL', cap(func.trim())]);
+  if(med) P.push(['MEDICIÓN OBJETIVA', med.trim()]);
   if(m.riesgos.length) P.push(['RIESGOS', cap(listJoin(m.riesgos)) + '.']);
 
 
@@ -689,12 +882,14 @@ document.getElementById('copyBtn').addEventListener('click', async ()=>{
 
 // Reinicia SOLO los datos del paciente; conserva el perfil y el tipo respiratorio
 function resetPatient(){
-  ['edad','cama','fc','fr','sat','fc2','fr2','sat2','expcm','novedades','dxOtro'].forEach(id=>{
+  ['edad','cama','sesion','fc','fr','sat','fc2','fr2','sat2','expcm','novedades','dxOtro'].concat((window.SCALES?window.SCALES.resp.concat(window.SCALES.fis).map(x=>'scale_'+x.key):[])).forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
   // limpiar sexo (single)
   const sg=document.querySelector('[data-single="sexo"]'); if(sg){ sg.querySelectorAll('.chip').forEach(c=>c.classList.remove('on')); }
   state.single.sexo=null;
+  ['tiponota','f_reflejo','f_tos','f_via','f_secre','f_patron','f_broncoasp','f_deamb','f_trans','f_cambios','f_sed','f_bip','f_fuerza','f_equi','f_caida'].forEach(k=>{ state.single[k]=null; const g=document.querySelector('[data-single="'+k+'"]'); if(g) g.querySelectorAll('.chip').forEach(c=>c.classList.remove('on')); });
+  if(state.multi.disp){ state.multi.disp=[]; const dg=document.querySelector('[data-multi="disp"]'); if(dg) dg.querySelectorAll('.chip').forEach(c=>c.classList.remove('on')); }
   document.getElementById('dx').value='';
   document.getElementById('dxOtroWrap').style.display='none';
 }
@@ -838,6 +1033,26 @@ const PRESETS = {
       plan:['continuar movilización por turno','reevaluación siguiente sesión'],
       edu:['técnicas de conservación de energía y dosificación de la actividad','importancia de la movilización temprana','adherencia al tratamiento y participación activa'],
       deja:['en cama con barandas arriba','con la cama en posición baja y freno activado','con el timbre de llamado al alcance']}
+  },
+  'Digestivo':{
+    dx:'__otro__', dxText:'',
+    single:{vent:'aire',conc:'alerta',com:'conservada',ori:'orientado en las 3 esferas',
+      llencap:'normal (menor a 2 segundos)',exp:'conservada',torax:'simétrico',ritmo:'regular',patron:'costodiafragmático',
+      acc:'sin uso de musculatura accesoria y sin tirajes',mv:'conservado',ruidos:'sin ruidos agregados',
+      tol:'tolera adecuadamente',svses:'sin cambios',dfat:'no presentó'},
+    multi:{estructura:['estómago (s530)','intestino (s540)'],
+      sistemas:['digestivo'],
+      categorias:['ventilación y respiración','capacidad aeróbica y resistencia','dolor','movilidad y locomoción'],
+      actividad:['andar (d450)','transferir el propio cuerpo (d420)','realización de quehaceres domésticos (d640)','cuidado de la propia salud (d5701)'],
+      riesgos:['hemorragia de vías digestivas','trombosis venosa profunda','broncoaspiración'],
+      campo:['ambos campos pulmonares'],
+      obj_resp:['prevenir complicaciones respiratorias asociadas al reposo','favorecer la reexpansión pulmonar'],
+      obj_fis:['favorecer la movilización temprana y la independencia funcional','prevenir el desacondicionamiento físico'],
+      pm_resp:['ejercicios respiratorios con MsSs','incentivo respiratorio','reexpansión torácica'],
+      pm_fis:['sedestación al borde de cama','bipedestación asistida','reeducación de marcha'],
+      plan:['continuar movilización por turno','reevaluación siguiente sesión'],
+      edu:['importancia de la movilización temprana','continuidad del plan de ejercicios'],
+      deja:['en cama con barandas arriba','con la cama en posición baja y freno activado','con el timbre de llamado al alcance']}
   }
 };
 
@@ -846,10 +1061,10 @@ const PRESETS = {
 const VARIANTS = {
   'Neurológico':{
     objFis:[
-      ['mantener e incrementar la fuerza muscular','reeducar el equilibrio y las reacciones posturales'],
+      ['preservar y mejorar los rangos de movimiento articular','reeducar el equilibrio y las reacciones posturales'],
       ['reeducar la marcha y las transferencias','favorecer la movilización temprana y la independencia funcional'],
-      ['prevenir el desacondicionamiento físico','mantener e incrementar la fuerza muscular'],
-      ['reeducar el equilibrio y las reacciones posturales','reeducar la marcha y las transferencias'],
+      ['prevenir el desacondicionamiento físico','favorecer la movilización temprana y la independencia funcional'],
+      ['mantener e incrementar la fuerza muscular','reeducar la marcha y las transferencias'],
       ['preservar y mejorar los rangos de movimiento articular','mantener e incrementar la fuerza muscular'],
       ['favorecer la movilización temprana y la independencia funcional','prevenir complicaciones del reposo prolongado']
     ],
@@ -930,12 +1145,12 @@ const VARIANTS = {
   },
   'Pulmonar':{
     objFis:[
-      ['prevenir el desacondicionamiento físico','favorecer la movilización temprana y la independencia funcional'],
-      ['mantener e incrementar la fuerza muscular','prevenir el desacondicionamiento físico'],
-      ['favorecer la movilización temprana y la independencia funcional','prevenir complicaciones del reposo prolongado'],
+      ['prevenir el desacondicionamiento físico','mantener e incrementar la fuerza muscular'],
+      ['favorecer la movilización temprana y la independencia funcional','prevenir el desacondicionamiento físico'],
+      ['favorecer la movilización temprana y la independencia funcional','mantener e incrementar la fuerza muscular'],
       ['prevenir el desacondicionamiento físico','reeducar la marcha y las transferencias'],
       ['mantener e incrementar la fuerza muscular','favorecer la movilización temprana y la independencia funcional'],
-      ['prevenir complicaciones del reposo prolongado','prevenir el desacondicionamiento físico']
+      ['mantener e incrementar la fuerza muscular','prevenir el desacondicionamiento físico']
     ],
     pmFis:[
       ['ejercicios de fortalecimiento'],
@@ -974,9 +1189,9 @@ const VARIANTS = {
     objFis:[
       ['preservar y mejorar los rangos de movimiento articular','mantener e incrementar la fuerza muscular'],
       ['mantener e incrementar la fuerza muscular','reeducar la marcha y las transferencias'],
-      ['manejar y disminuir el dolor','preservar y mejorar los rangos de movimiento articular'],
-      ['reeducar la marcha y las transferencias','favorecer la movilización temprana y la independencia funcional'],
-      ['manejar y disminuir el dolor','mantener e incrementar la fuerza muscular'],
+      ['mantener e incrementar la fuerza muscular','preservar y mejorar los rangos de movimiento articular'],
+      ['preservar y mejorar los rangos de movimiento articular','prevenir complicaciones del reposo prolongado'],
+      ['favorecer la movilización temprana y la independencia funcional','mantener e incrementar la fuerza muscular'],
       ['preservar y mejorar los rangos de movimiento articular','favorecer la movilización temprana y la independencia funcional']
     ],
     pmFis:[
@@ -1052,6 +1267,48 @@ const VARIANTS = {
       'Durante la sesión se evidencia adecuada participación; se continúa el fortalecimiento y la reeducación de la marcha.',
       'El paciente tolera la sesión pese a la fatiga propia de su condición; se prioriza la eficiencia del esfuerzo.',
       'Se observa adecuada respuesta a la movilización activa; se continúa el fortalecimiento y el acondicionamiento general.'
+    ]
+  },
+  'Digestivo':{
+    objFis:[
+      ['favorecer la movilización temprana y la independencia funcional','prevenir complicaciones del reposo prolongado'],
+      ['prevenir el desacondicionamiento físico','mantener e incrementar la fuerza muscular'],
+      ['prevenir complicaciones del reposo prolongado','preservar y mejorar los rangos de movimiento articular'],
+      ['reeducar la marcha y las transferencias','favorecer la movilización temprana y la independencia funcional'],
+      ['manejar y disminuir el dolor','favorecer la movilización temprana y la independencia funcional'],
+      ['mantener e incrementar la fuerza muscular','prevenir el desacondicionamiento físico']
+    ],
+    pmFis:[
+      ['sedestación al borde de cama','bipedestación asistida','reeducación de marcha'],
+      ['movilizaciones activas','ejercicios de fortalecimiento'],
+      ['movilizaciones pasivas','movilizaciones activo-asistidas','cambios de posición'],
+      ['sedestación al borde de cama','bipedestación asistida','reeducación de marcha'],
+      ['cambios de posición','sedestación al borde de cama','movilizaciones activas'],
+      ['ejercicios de fortalecimiento','reeducación de marcha']
+    ],
+    plan:[
+      ['continuar movilización por turno','reevaluación siguiente sesión'],
+      ['continuar movilización por turno','reeducación de marcha'],
+      ['reevaluación siguiente sesión'],
+      ['reeducación de marcha','reevaluación siguiente sesión'],
+      ['continuar movilización por turno'],
+      ['continuar movilización por turno','reevaluación siguiente sesión']
+    ],
+    educacion:[
+      ['importancia de la movilización temprana','continuidad del plan de ejercicios'],
+      ['adherencia al tratamiento y participación activa','importancia de la movilización temprana'],
+      ['prevención de úlceras por presión','prevención de caídas y medidas de seguridad'],
+      ['importancia de la movilización temprana','prevención de caídas y medidas de seguridad'],
+      ['continuidad del plan de ejercicios','adherencia al tratamiento y participación activa'],
+      ['importancia de la movilización temprana','adherencia al tratamiento y participación activa']
+    ],
+    observaciones:[
+      'El paciente tolera la movilización temprana sin dolor abdominal significativo; se favorece la recuperación del tránsito intestinal.',
+      'Se evidencia adecuada tolerancia a la actividad; se progresa el acondicionamiento respetando el estado abdominal.',
+      'Paciente con precaución por su condición digestiva; se realiza movilización suave vigilando signos de sangrado o dolor.',
+      'Durante la sesión se observa mejor tolerancia a las transferencias; se continúa la progresión hacia la marcha.',
+      'El paciente refiere dolor abdominal controlado durante la actividad; se dosifica la intensidad y se cuida la mecánica corporal.',
+      'Se evidencia progreso en fuerza y tolerancia al esfuerzo; se continúa el acondicionamiento y la reeducación de la marcha.'
     ]
   }
 };
@@ -1173,7 +1430,7 @@ function markChip(type,key,v){
 document.querySelectorAll('.card').forEach(card=>{
   const h2=card.querySelector('h2'); if(!h2) return;
   const t=h2.textContent;
-  if(/Detalles CIF|Objetivos|Plan de manejo|Tolerancia|Plan y educación/.test(t)){
+  if(/Detalles CIF|Objetivos|Plan de manejo|Tolerancia|Plan y educación|Valoración funcional|Medición objetiva/.test(t)){
     card.classList.add('collapsible','collapsed');
     const body=document.createElement('div'); body.className='cardbody';
     while(h2.nextSibling){ body.appendChild(h2.nextSibling); }
